@@ -1,0 +1,3 @@
+# Relative to CWD
+require: "./test/setup.js"
+recursive: true
