@@ -1,0 +1,25 @@
+.git
+
+.DS_Store
+.project
+.vscode
+
+# Dependencies
+node_modules
+.pnpm-debug.log*
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Test
+.nyc_output
+coverage
+
+# Wireit + caches
+.wireit
+.eslintcache
+
+# Ignore all yarn2+
+.yarn/*
+.yarnrc*
+.pnp.*
