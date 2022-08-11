@@ -24,9 +24,9 @@
   },
   "scripts": {
     "lint": "pnpm run -r lint",
-    "test": "pnpm run -r test",
-    "check": "pnpm run -r check",
-    "check:ci": "pnpm run -r check:ci",
+    "test": "pnpm run -r --stream test",
+    "check": "pnpm run -r --stream check",
+    "check:ci": "pnpm run -r --stream check:ci",
     "codecov": "pnpm run -r codecov"
   }
 }
