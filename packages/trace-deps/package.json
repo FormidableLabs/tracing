@@ -27,7 +27,7 @@
     "test:cov": "pnpm exec nyc mocha",
     "check": "pnpm run lint && pnpm run test",
     "check:ci": "pnpm run lint && pnpm run test:cov",
-    "codecov": "pnpm exec codecov --root ../.."
+    "codecov": "pnpm exec codecov -p \"../..\""
   },
   "engines": {
     "node": ">=8.0.0"
