@@ -18,55 +18,43 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         node-version: [14.x, 16.x, 18.x]
 
-    steps:
+   steps:
       - uses: actions/checkout@v2
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
 
-      # Note: Yarn root cache restore is slow (1:30) on Windows, so only do on Linux.
-      - name: Get Yarn cache directory
-        if: runner.os != 'Windows'
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+      # TODO(wireit): Enable for caching
+      # # Wireit cache
+      # - uses: google/wireit@setup-github-actions-caching/v1
 
-      - name: Use Yarn cache
-        if: runner.os != 'Windows'
-        uses: actions/cache@v2
-        id: yarn-cache
+      - uses: pnpm/action-setup@v2.2.2
         with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: yarn-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-${{ runner.os }}-${{ matrix.node-version }}-
-            yarn-${{ runner.os }}-
+          version: 7
 
-      - name: Use node_modules cache
-        id: node-modules-cache
-        uses: actions/cache@v2
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
         with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('./yarn.lock') }}
-          restore-keys: |
-            node-modules-${{ runner.os }}-${{ matrix.node-version }}-
-            node-modules-${{ runner.os }}-
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys:s |
+            ${{ runner.os }}-pnpm-store-
 
-      - name: Project installation
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: yarn install --prefer-offline --frozen-lockfile --non-interactive
-        env:
-          CI: true
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: Basic script runs
-        run: |
-          node bin/trace-deps.js -v
-          node bin/trace-deps.js -h
+      - name: Check Code ${{ matrix.node-version }}
+        run: pnpm check:ci
 
-      - name: Checks
-        run: yarn check-ci
-
-      - name: Code coverage
-        run: yarn codecov
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      # TODO(cov): Get token and enable
+      # TODO(cov): Also do badge update in readmes
+      # - name: Code coverage ${{ matrix.node-version }}
+      #   run: pnpm codecov
+      #   env:
+      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
