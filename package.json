@@ -8,6 +8,8 @@
   "devDependencies": {
     "@babel/core": "^7.18.5",
     "@babel/eslint-parser": "^7.18.2",
+    "@changesets/cli": "^2.24.2",
+    "@svitejs/changesets-changelog-github-compact": "^0.1.1",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "codecov": "^3.8.3",
@@ -23,6 +25,8 @@
     "sinon-chai": "^3.7.0"
   },
   "scripts": {
+    "version": "pnpm changeset version && pnpm install --no-frozen-lockfile",
+    "publish": "pnpm changeset publish",
     "lint": "pnpm run -r lint",
     "test": "pnpm run -r --stream test",
     "check": "pnpm run -r --stream check",
