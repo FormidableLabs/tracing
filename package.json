@@ -23,6 +23,7 @@
     "sinon-chai": "^3.7.0"
   },
   "scripts": {
-    "check:ci": "pnpm run -r check"
+    "check:ci": "pnpm run -r check:ci",
+    "codecov": "pnpm run -r codecov"
   }
 }

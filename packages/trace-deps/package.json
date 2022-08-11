@@ -24,9 +24,9 @@
   "scripts": {
     "lint": "pnpm exec eslint .",
     "test": "pnpm exec mocha",
-    "test-cov": "pnpm exec nyc mocha",
+    "test:cov": "pnpm exec nyc mocha",
     "check": "pnpm run lint && pnpm run test",
-    "check-ci": "pnpm run lint && pnpm run test-cov",
+    "check:ci": "pnpm run lint && pnpm run test:cov",
     "codecov": "pnpm exec codecov"
   },
   "engines": {

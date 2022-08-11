@@ -52,9 +52,6 @@ jobs:
       - name: Check Code ${{ matrix.node-version }}
         run: pnpm check:ci
 
-      # TODO(cov): Get token and enable
       # TODO(cov): Also do badge update in readmes
       - name: Code coverage ${{ matrix.node-version }}
         run: pnpm codecov
-      #   env:
-      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
