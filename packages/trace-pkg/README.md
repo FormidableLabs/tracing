@@ -483,13 +483,12 @@ If you are using the `serverless` framework, definitely give `serverless-jetpack
 [npm_img]: https://badge.fury.io/js/trace-pkg.svg
 [npm_site]: http://badge.fury.io/js/trace-pkg
 
-[trace-deps]: https://github.com/FormidableLabs/tracing/packages/trace-deps
+[trace-deps]: https://github.com/FormidableLabs/tracing/tree/main/packages/trace-deps#readme
 [Serverless framework]: https://www.serverless.com/
 [serverless-jetpack]: https://github.com/FormidableLabs/serverless-jetpack
 [tracing mode]: https://github.com/FormidableLabs/serverless-jetpack#tracing-mode
 [fast-glob]: https://github.com/mrmlnc/fast-glob
 [maintenance-image]: https://img.shields.io/badge/maintenance-active-green.svg?color=brightgreen&style=flat
-
 
 ## Maintenance Status
 

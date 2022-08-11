@@ -12,6 +12,7 @@
     "index.js"
   ],
   "repository": "https://github.com/FormidableLabs/tracing",
+  "homepage": "https://github.com/FormidableLabs/tracing/tree/main/packages/trace-pkg#readme",
   "author": "Ryan Roemer <ryan.roemer@formidable.com>",
   "license": "MIT",
   "keywords": [
