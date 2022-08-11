@@ -2,8 +2,6 @@ trace-pkg 📦
 ============
 
 [![npm version][npm_img]][npm_site]
-[![Actions Status][actions_img]][actions_site]
-[![Coverage Status][cov_img]][cov_site]
 [![Maintenance Status][maintenance-image]](#maintenance-status)
 
 A blazingly fast Node.js zip application packager for AWS Lambda, etc.
@@ -484,12 +482,8 @@ If you are using the `serverless` framework, definitely give `serverless-jetpack
 
 [npm_img]: https://badge.fury.io/js/trace-pkg.svg
 [npm_site]: http://badge.fury.io/js/trace-pkg
-[actions_img]: https://github.com/FormidableLabs/trace-pkg/workflows/CI/badge.svg
-[actions_site]: https://github.com/FormidableLabs/trace-pkg/actions
-[cov_img]: https://codecov.io/gh/FormidableLabs/trace-pkg/branch/main/graph/badge.svg
-[cov_site]: https://codecov.io/gh/FormidableLabs/trace-pkg
 
-[trace-deps]: https://github.com/FormidableLabs/trace-deps
+[trace-deps]: https://github.com/FormidableLabs/tracing/packages/trace-deps
 [Serverless framework]: https://www.serverless.com/
 [serverless-jetpack]: https://github.com/FormidableLabs/serverless-jetpack
 [tracing mode]: https://github.com/FormidableLabs/serverless-jetpack#tracing-mode

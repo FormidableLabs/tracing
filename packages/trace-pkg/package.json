@@ -6,9 +6,11 @@
   "bin": {
     "trace-pkg": "./bin/trace-pkg.js"
   },
-  "engines": {
-    "node": ">=10.0.0"
-  },
+  "files": [
+    "bin",
+    "lib",
+    "index.js"
+  ],
   "repository": "https://github.com/FormidableLabs/tracing",
   "author": "Ryan Roemer <ryan.roemer@formidable.com>",
   "license": "MIT",
