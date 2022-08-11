@@ -27,7 +27,7 @@ configs:
     # `redis-parser` has an optional + undeclared dependency on `hiredis`
     # for legacy mode (try/catch-ed) which is optional.
     'redis-parser': ['hiredis']
-    
+
     # adm-zip has support for electron original-fs which we don't need
     'adm-zip': ['original-fs']
 
@@ -177,7 +177,7 @@ configs:
       # - [104:15]: require(dir + '/package.json')
       #
       "pkginfo/lib/pkginfo.js": false
-      
+
       # Prisma tries to dynamically find the project route by importing package.json files, which
       # we already include. You'll also want to make sure "node_modules/.prisma/client/*" is
       # included in your packages using the "include" option.

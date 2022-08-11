@@ -26,10 +26,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      # TODO(wireit): Enable for caching
-      # # Wireit cache
-      # - uses: google/wireit@setup-github-actions-caching/v1
-
       - uses: pnpm/action-setup@v2.2.2
         with:
           version: 7
@@ -52,6 +48,5 @@ jobs:
       - name: Check Code ${{ matrix.node-version }}
         run: pnpm check:ci
 
-      # TODO(cov): Also do badge update in readmes
       - name: Code coverage ${{ matrix.node-version }}
         run: pnpm codecov
