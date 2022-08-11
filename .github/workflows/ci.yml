@@ -18,7 +18,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         node-version: [14.x, 16.x, 18.x]
 
-   steps:
+    steps:
       - uses: actions/checkout@v2
 
       - name: Use Node.js ${{ matrix.node-version }}
@@ -43,7 +43,7 @@ jobs:
         with:
           path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys:s |
+          restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
@@ -54,7 +54,7 @@ jobs:
 
       # TODO(cov): Get token and enable
       # TODO(cov): Also do badge update in readmes
-      # - name: Code coverage ${{ matrix.node-version }}
-      #   run: pnpm codecov
+      - name: Code coverage ${{ matrix.node-version }}
+        run: pnpm codecov
       #   env:
       #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
