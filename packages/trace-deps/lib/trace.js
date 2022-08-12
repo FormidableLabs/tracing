@@ -530,20 +530,23 @@ const traceFile = async ({
   //
   // Rather than trying to infer if a given source file is ESM vs. CJS, we just
   // try both...
+  const baseOpts = {
+    locations: true,
+    ecmaVersion: "latest", // fully modern, hipster ECMAScript
+    onComment
+  };
   let ast;
   try {
     // First try as a module.
     ast = parse(src, {
       sourceType: "module",
       allowAwaitOutsideFunction: true, // for top-level await
-      locations: true,
-      ecmaVersion: "latest", // fully modern, hipster ECMAScript
-      onComment
+      ...baseOpts
     });
   } catch (modErr) {
     // Then as script.
     try {
-      ast = parse(src, { sourceType: "script", locations: true, onComment });
+      ast = parse(src, { sourceType: "script", ...baseOpts });
     } catch (scriptErr) {
       // Use original module error, with some helper errors.
       throw new Error(`Encountered parse error in ${srcPath}: ${modErr}`);
