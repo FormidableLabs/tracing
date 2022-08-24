@@ -1,0 +1,28 @@
+service: tracing-demo-serverless
+
+
+custom:
+  region: ${opt:region, env:AWS_REGION, "us-east-1"}
+  stage: ${opt:stage, env:STAGE, "localdev"}
+
+# TODO(jetpack): Add offline plugin
+# plugins:
+#   modules:
+#     - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: ${self:custom.region}
+  stage: ${self:custom.stage}
+  environment:
+    STAGE: ${self:custom.stage}
+  timeout: 30 # seconds (`300` max)
+  memorySize: 128 # MB value (`1024` default)
+
+functions:
+  base:
+    handler: src/base.handler
+    events: # Use a generic proxy to allow Express app to route.
+      - http: ANY /base
+      - http: 'ANY /base/{proxy+}'

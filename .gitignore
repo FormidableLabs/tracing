@@ -15,6 +15,9 @@ package-lock.json
 .nyc_output
 coverage
 
+# Demo
+.serverless
+
 # Wireit + caches
 .wireit
 .eslintcache
