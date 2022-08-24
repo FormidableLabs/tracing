@@ -40,6 +40,15 @@ importers:
       sinon: 14.0.0
       sinon-chai: 3.7.0_chai@4.3.6+sinon@14.0.0
 
+  demo/serverless:
+    specifiers:
+      serverless-jetpack: ^0.11.1
+    dependencies:
+      serverless-jetpack: link:../../packages/serverless-jetpack
+
+  packages/serverless-jetpack:
+    specifiers: {}
+
   packages/trace-deps:
     specifiers:
       acorn: ^8.7.1

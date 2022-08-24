@@ -1,0 +1,26 @@
+{
+  "name": "serverless-jetpack",
+  "version": "0.11.1",
+  "description": "A faster JavaScript packager for Serverless applications.",
+  "private": true,
+  "main": "index.js",
+  "repository": "https://github.com/FormidableLabs/tracing",
+  "homepage": "https://github.com/FormidableLabs/tracing/tree/main/packages/serverless-jetpack#readme",
+  "author": "Ryan Roemer <ryan.roemer@formidable.com>",
+  "license": "MIT",
+  "keywords": [
+    "serverless",
+    "serverless artifact",
+    "serverless package",
+    "serverless plugin",
+    "amazon web services",
+    "aws",
+    "lambda",
+    "npm",
+    "yarn"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "tracing-demo-serverless",
+  "version": "0.0.1",
+  "description": "Example Serverless Framework application",
+  "private": true,
+  "main": "index.js",
+  "repository": "https://github.com/FormidableLabs/tracing",
+  "homepage": "https://github.com/FormidableLabs/tracing/tree/main/demo/serverless#readme",
+  "author": "Ryan Roemer <ryan.roemer@formidable.com>",
+  "license": "MIT",
+  "dependencies": {
+    "serverless-jetpack": "^0.11.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+  }
+}
