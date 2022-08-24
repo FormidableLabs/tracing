@@ -9,9 +9,16 @@
   "author": "Ryan Roemer <ryan.roemer@formidable.com>",
   "license": "MIT",
   "dependencies": {
+    "express": "^4.18.1",
+    "serverless-http": "^3.0.2"
+  },
+  "devDependencies": {
+    "serverless": "^3.22.0",
     "serverless-jetpack": "^0.11.1"
   },
-  "devDependencies": {},
   "scripts": {
+    "start": "node ./index.js",
+    "lint": "echo TODO_JETPACK",
+    "lint:fix": "echo TODO_JETPACK"
   }
 }

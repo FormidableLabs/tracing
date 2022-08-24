@@ -22,5 +22,7 @@
   "dependencies": {},
   "devDependencies": {},
   "scripts": {
+    "lint": "echo TODO_JETPACK",
+    "lint:fix": "echo TODO_JETPACK"
   }
 }
