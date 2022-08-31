@@ -6,9 +6,9 @@ custom:
   stage: ${opt:stage, env:STAGE, "localdev"}
 
 # TODO(jetpack): Add offline plugin
-# plugins:
-#   modules:
-#     - serverless-offline
+plugins:
+  modules:
+    - serverless-jetpack
 
 provider:
   name: aws

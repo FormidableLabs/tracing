@@ -22,7 +22,10 @@
   "dependencies": {},
   "devDependencies": {},
   "scripts": {
-    "lint": "echo TODO_JETPACK",
-    "lint:fix": "echo TODO_JETPACK"
+    "lint": "pnpm exec eslint .",
+    "test": "echo TODO JETPACK - test",
+    "test:cov": "echo TODO JETPACK - test:cov",
+    "check": "pnpm run lint && pnpm run test",
+    "check:ci": "pnpm run lint && pnpm run test:cov"
   }
 }
