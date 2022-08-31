@@ -2,6 +2,7 @@
 
 class Jetpack {
   constructor(serverless, options) {
+    // TODO(jetpack): Confirm both of these are used.
     this.serverless = serverless;
     this.options = options;
 
@@ -68,9 +69,10 @@ class Jetpack {
     // is still a bit hacky, but not nearly as invasive as some of the other
     // approaches we considered. H/T to `@medikoo` for the strategy:
     // https://github.com/FormidableLabs/serverless-jetpack/pull/68#issuecomment-556987101
+    const packageFn = this.package.bind(this);
     const delayedHooks = {
-      "before:package:createDeploymentArtifacts": this.package.bind(this),
-      "before:package:function:package": this.package.bind(this)
+      "before:package:createDeploymentArtifacts": packageFn,
+      "before:package:function:package": packageFn
     };
 
     this.hooks = {
@@ -85,11 +87,13 @@ class Jetpack {
           });
         });
       },
-      "jetpack:package:package": this.package.bind(this)
+      "jetpack:package:package": packageFn
     };
   }
 
   async package() {
+    // TODO(jetpack): Remove
+    // eslint-disable-next-line no-console
     console.log("TODO(jetpack): package method called");
   }
 }

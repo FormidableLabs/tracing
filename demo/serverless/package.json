@@ -18,7 +18,8 @@
   },
   "scripts": {
     "start": "node ./index.js",
-    "lint": "echo TODO_JETPACK",
-    "lint:fix": "echo TODO_JETPACK"
+    "lint": "pnpm exec eslint .",
+    "check": "pnpm run lint",
+    "check:ci": "pnpm run lint"
   }
 }
