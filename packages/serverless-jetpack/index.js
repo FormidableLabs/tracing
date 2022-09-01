@@ -6,7 +6,14 @@ class Jetpack {
     this.serverless = serverless;
     this.options = options;
 
-    this.commands = {
+    // Initialize internal state.
+    this.commands = this._getCommands();
+    this.hooks = this._getHooks({ hooks: serverless.pluginManager.hooks });
+  }
+
+  // Constructor helpers.
+  _getCommands() {
+    return {
       jetpack: {
         usage: "Alternate Serverless packager",
         commands: {
@@ -33,6 +40,10 @@ class Jetpack {
         }
       }
     };
+  }
+
+  _getHooks({ hooks }) {
+    const packageFn = this.package.bind(this);
 
     // The `ServerlessEnterprisePlugin` awkwardly wreaks havoc with alternative
     // packaging.
@@ -69,17 +80,15 @@ class Jetpack {
     // is still a bit hacky, but not nearly as invasive as some of the other
     // approaches we considered. H/T to `@medikoo` for the strategy:
     // https://github.com/FormidableLabs/serverless-jetpack/pull/68#issuecomment-556987101
-    const packageFn = this.package.bind(this);
     const delayedHooks = {
       "before:package:createDeploymentArtifacts": packageFn,
       "before:package:function:package": packageFn
     };
 
-    this.hooks = {
+    return {
       // Use delayed hooks to guarantee we are **last** to run so other things
       // like the Serverless Enterprise plugin run before us.
       initialize: () => {
-        const { hooks } = serverless.pluginManager;
         Object.keys(delayedHooks).forEach((event) => {
           hooks[event] = (hooks[event] || []).concat({
             pluginName: this.constructor.name,
