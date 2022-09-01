@@ -43,7 +43,8 @@ class Jetpack {
   }
 
   _getHooks({ hooks }) {
-    const packageFn = this.package.bind(this);
+    const pluginName = this.constructor.name;
+    const hook = this.package.bind(this);
 
     // The `ServerlessEnterprisePlugin` awkwardly wreaks havoc with alternative
     // packaging.
@@ -80,23 +81,19 @@ class Jetpack {
     // is still a bit hacky, but not nearly as invasive as some of the other
     // approaches we considered. H/T to `@medikoo` for the strategy:
     // https://github.com/FormidableLabs/serverless-jetpack/pull/68#issuecomment-556987101
-    const delayedHooks = {
-      "before:package:createDeploymentArtifacts": packageFn,
-      "before:package:function:package": packageFn
-    };
-
     return {
       // Use delayed hooks to guarantee we are **last** to run so other things
       // like the Serverless Enterprise plugin run before us.
       initialize: () => {
-        Object.keys(delayedHooks).forEach((event) => {
-          hooks[event] = (hooks[event] || []).concat({
-            pluginName: this.constructor.name,
-            hook: delayedHooks[event]
-          });
+        [
+          "before:package:createDeploymentArtifacts",
+          "before:package:function:package"
+        ].forEach((event) => {
+          hooks[event] = (hooks[event] || []).concat({ pluginName, hook });
         });
       },
-      "jetpack:package:package": packageFn
+      // Our custom hook is fine with normal injection.
+      "jetpack:package:package": hook
     };
   }
 
