@@ -2597,7 +2597,109 @@ describe("lib/trace", () => {
     });
 
     describe("user conditions", () => {
-      it("TODO(conditions)"); // TODO: IMPLEMENT
+      it("handles user conditions", async () => {
+        mock({
+          "first.js": `
+            const one = require("one");
+            const dynamicTwo = () => import("two");
+            const second = require("./second");
+          `,
+          "second.js": `
+            const one = require.resolve("one");
+
+            (async () => {
+              await import("three");
+            })();
+          `,
+          node_modules: {
+            one: {
+              "package.json": stringify({
+                name: "one",
+                main: "index.js",
+                exports: {
+                  ".": {
+                    bespoke: "./bespoke.js",
+                    production: "./production.js",
+                    "default": "./default.js"
+                  }
+                }
+              }),
+              "index.js": "module.exports = 'one';",
+              "default.js": "module.exports = 'default';",
+              "production.js": "module.exports = 'production';",
+              "bespoke.js": "module.exports = 'bespoke';"
+            },
+            two: {
+              "package.json": stringify({
+                name: "two",
+                main: "index.js",
+                exports: {
+                  ".": {
+                    bespoke: "./bespoke.js",
+                    production: "./production.js",
+                    require: "./require.js"
+                  }
+                }
+              }),
+              "index.js": "module.exports = 'two';",
+              "require.js": "module.exports = 'require';",
+              "production.js": "module.exports = 'production';",
+              "bespoke.js": "module.exports = 'bespoke';"
+            },
+            three: {
+              "package.json": stringify({
+                name: "three",
+                main: "index.mjs",
+                type: "module"
+              }),
+              "index.mjs": `
+                import three from "nested-three";
+                export default three;
+              `,
+              node_modules: {
+                "nested-three": {
+                  "package.json": stringify({
+                    name: "nested-three",
+                    main: "index.mjs",
+                    type: "module",
+                    exports: {
+                      ".": {
+                        bespoke: "./bespoke.mjs",
+                        "import": "./import.mjs",
+                        production: "./production.mjs"
+                      }
+                    }
+                  }),
+                  "index.mjs": "export const three = 'three';",
+                  "import.mjs": "export const msg = 'import';",
+                  "production.mjs": "export const msg = 'production';",
+                  "bespoke.mjs": "export const msg = 'bespoke';"
+                }
+              }
+            }
+          }
+        });
+
+        // TODO(conditions): Add bespoke, production conditions.
+        const { dependencies, misses } = await traceFile({
+          srcPath: "first.js"
+        });
+        expect(dependencies).to.eql(fullPaths([
+          "node_modules/one/default.js",
+          "node_modules/one/index.js",
+          "node_modules/one/package.json",
+          "node_modules/three/index.mjs",
+          "node_modules/three/node_modules/nested-three/import.mjs",
+          "node_modules/three/node_modules/nested-three/index.mjs",
+          "node_modules/three/node_modules/nested-three/package.json",
+          "node_modules/three/package.json",
+          "node_modules/two/index.js",
+          "node_modules/two/package.json",
+          "node_modules/two/require.js",
+          "second.js"
+        ]));
+        expect(misses).to.eql({});
+      });
     });
   });
 
