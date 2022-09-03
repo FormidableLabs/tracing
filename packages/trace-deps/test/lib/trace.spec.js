@@ -2098,12 +2098,10 @@ describe("lib/trace", () => {
 
               expect(dependencies).to.eql(fullPaths([
                 "node_modules/complicated/default.js",
-                "node_modules/complicated/development.js",
                 "node_modules/complicated/import.mjs",
                 "node_modules/complicated/local/two.mjs",
                 "node_modules/complicated/main.js",
                 "node_modules/complicated/package.json",
-                "node_modules/complicated/production.mjs",
                 "node_modules/subdep/default.js",
                 "node_modules/subdep/from-default.js",
                 "node_modules/subdep/from-main.js",
@@ -2149,11 +2147,9 @@ describe("lib/trace", () => {
 
               expect(dependencies).to.eql(fullPaths([
                 "node_modules/complicated/default.js",
-                "node_modules/complicated/development.js",
                 "node_modules/complicated/local/one.js",
                 "node_modules/complicated/main.js",
                 "node_modules/complicated/package.json",
-                "node_modules/complicated/production.mjs",
                 "node_modules/complicated/require.js",
                 // Note: All of the import paths are to sub-paths, and **not**
                 // the root package, so no defaults in play.
@@ -2286,12 +2282,10 @@ describe("lib/trace", () => {
               const { dependencies, misses } = await traceFile({ srcPath });
 
               expect(dependencies).to.eql(fullPaths([
-                "node_modules/complicated/development.js",
                 "node_modules/complicated/import.mjs",
                 "node_modules/complicated/local/one.js",
                 "node_modules/complicated/local/two.mjs",
                 "node_modules/complicated/package.json",
-                "node_modules/complicated/production.mjs",
                 "node_modules/complicated/require.js",
                 "node_modules/subdep/default.js",
                 "node_modules/subdep/from-require.js",
@@ -2600,6 +2594,10 @@ describe("lib/trace", () => {
         );
         expect(misses).to.eql({});
       });
+    });
+
+    describe("user conditions", () => {
+      it("TODO(conditions)"); // TODO: IMPLEMENT
     });
   });
 

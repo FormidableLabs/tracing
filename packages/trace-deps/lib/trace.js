@@ -30,21 +30,33 @@ const RESOLVE_EXTS = [".js", ".json"];
 // https://github.com/FormidableLabs/trace-deps/issues/56
 const CONDITIONS = [
   // Node.js conditions
+  //
   // https://nodejs.org/api/packages.html#packages_conditional_exports
+  // > Node.js implements the following conditions, listed in order from most specific to
+  // > least specific as conditions should be defined:
+  // > - "node-addons"
+  // > - "node"
+  // > - "import"
+  // > - "require
+  // > - "default"
+  // NOTE: We don't include `node-addons` but could...
   "import",
   "require",
   "node",
   // Try `default` in both CJS + ESM modes.
   ["default", { require: true }],
-  ["default", { require: false }],
+  ["default", { require: false }]
 
   // Endorsed user conditions.
-  // https://nodejs.org/api/packages.html#packages_conditions_definitions
   //
-  // Note: We are ignoring
-  // - `browser`
-  "development",
-  "production"
+  // https://nodejs.org/api/packages.html#community-conditions-definitions
+  // > - "types"
+  // > - "deno"
+  // > - "browser"
+  // > - "development"
+  // > - "production"
+  //
+  // We do not default include any of these, but can be added with user-specified conditions.
 ];
 
 // Exports that disable modern ESM.
