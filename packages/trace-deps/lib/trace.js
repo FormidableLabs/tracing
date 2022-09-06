@@ -185,6 +185,7 @@ const _recurseDeps = async ({
   srcPaths,
   depPaths = [],
   ignores = [],
+  conditions = [],
   allowMissing = {},
   bailOnMissing = true,
   includeSourceMaps = false,
@@ -215,6 +216,7 @@ const _recurseDeps = async ({
       const traced = await traceFile({
         srcPath: depPath,
         ignores,
+        conditions,
         allowMissing,
         bailOnMissing,
         includeSourceMaps,
@@ -241,6 +243,7 @@ const _resolveDep = async ({
   depName,
   basedir,
   srcPath,
+  conditions,
   dependencies,
   extraDepKeys,
   addMisses,
@@ -351,7 +354,8 @@ const _resolveDep = async ({
           }
         });
 
-        CONDITIONS.forEach((cond) => {
+        console.log("TODO HERE", { depName, srcPath, conditions })
+        CONDITIONS.concat(conditions).forEach((cond) => {
           let resolveOpts;
           if (Array.isArray(cond)) {
             resolveOpts = cond[1];
@@ -443,6 +447,7 @@ const _resolveDep = async ({
             depName,
             basedir,
             srcPath,
+            conditions,
             dependencies,
             extraDepKeys,
             addMisses,
@@ -499,6 +504,7 @@ const _resolveDep = async ({
  * @param {*}             opts                    options object
  * @param {string}        opts.srcPath            source file path to trace
  * @param {Array<string>} opts.ignores            list of package prefixes to ignore
+ * @param {Array<string>} opts.conditions         list of additional user conditions to trace
  * @param {Object}        opts.allowMissing       map packages to list of allowed missing package
  * @param {boolean}       opts.bailOnMissing      allow static dependencies to be missing
  * @param {boolean}       opts.includeSourceMaps  include source map paths in output
@@ -511,6 +517,7 @@ const _resolveDep = async ({
 const traceFile = async ({
   srcPath,
   ignores = [],
+  conditions = [],
   allowMissing = {},
   bailOnMissing = true,
   includeSourceMaps = false,
@@ -606,6 +613,7 @@ const traceFile = async ({
       depName,
       basedir,
       srcPath,
+      conditions,
       dependencies,
       extraDepKeys,
       addMisses,
@@ -640,6 +648,7 @@ const traceFile = async ({
   const recursed = await _recurseDeps({
     depPaths,
     ignores,
+    conditions,
     allowMissing,
     bailOnMissing,
     includeSourceMaps,
@@ -670,6 +679,7 @@ const traceFile = async ({
  * @param {*}             opts                    options object
  * @param {Array<string>} opts.srcPaths           source file paths to trace
  * @param {Array<string>} opts.ignores            list of package prefixes to ignore
+ * @param {Array<string>} opts.conditions         list of additional user conditions to trace
  * @param {Object}        opts.allowMissing       map packages to list of allowed missing package
  * @param {boolean}       opts.bailOnMissing      allow static dependencies to be missing
  * @param {boolean}       opts.includeSourceMaps  include source map paths in output
@@ -681,6 +691,7 @@ const traceFile = async ({
 const traceFiles = async ({
   srcPaths,
   ignores = [],
+  conditions = [],
   allowMissing = {},
   bailOnMissing = true,
   includeSourceMaps = false,
@@ -694,6 +705,7 @@ const traceFiles = async ({
   const results = await _recurseDeps({
     srcPaths,
     ignores,
+    conditions,
     allowMissing,
     bailOnMissing,
     includeSourceMaps,

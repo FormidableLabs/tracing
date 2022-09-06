@@ -2665,8 +2665,9 @@ describe("lib/trace", () => {
                     exports: {
                       ".": {
                         bespoke: "./bespoke.mjs",
-                        "import": "./import.mjs",
-                        production: "./production.mjs"
+                        // TODO: Why does order matter. Not picked up if behind `import`???
+                        production: "./production.mjs",
+                        "import": "./import.mjs"
                       }
                     }
                   }),
@@ -2680,21 +2681,30 @@ describe("lib/trace", () => {
           }
         });
 
-        // TODO(conditions): Add bespoke, production conditions.
         const { dependencies, misses } = await traceFile({
-          srcPath: "first.js"
+          srcPath: "first.js",
+          conditions: [
+            "bespoke",
+            "production"
+          ]
         });
         expect(dependencies).to.eql(fullPaths([
+          "node_modules/one/bespoke.js",
           "node_modules/one/default.js",
           "node_modules/one/index.js",
           "node_modules/one/package.json",
+          "node_modules/one/production.js",
           "node_modules/three/index.mjs",
+          "node_modules/three/node_modules/nested-three/bespoke.mjs",
           "node_modules/three/node_modules/nested-three/import.mjs",
           "node_modules/three/node_modules/nested-three/index.mjs",
           "node_modules/three/node_modules/nested-three/package.json",
+          "node_modules/three/node_modules/nested-three/production.mjs",
           "node_modules/three/package.json",
+          "node_modules/two/bespoke.js",
           "node_modules/two/index.js",
           "node_modules/two/package.json",
+          "node_modules/two/production.js",
           "node_modules/two/require.js",
           "second.js"
         ]));
