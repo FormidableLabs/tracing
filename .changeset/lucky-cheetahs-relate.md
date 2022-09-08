@@ -1,5 +1,6 @@
 ---
 "trace-deps": minor
+"trace-pkg": minor
 ---
 
 - Feature: Add `conditions` parameter to `traceFile`/`traceFiles` to support user runtime loading conditions.
