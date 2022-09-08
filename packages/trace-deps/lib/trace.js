@@ -354,13 +354,13 @@ const _resolveDep = async ({
           }
         });
 
-        console.log("TODO HERE", { depName, srcPath, conditions });
         CONDITIONS.concat(conditions).forEach((cond) => {
           let resolveOpts;
           if (Array.isArray(cond)) {
             resolveOpts = cond[1];
             cond = cond[0];
           }
+
 
           let relPath;
           try {

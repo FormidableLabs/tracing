@@ -2650,9 +2650,21 @@ describe("lib/trace", () => {
               "package.json": stringify({
                 name: "three",
                 main: "index.mjs",
-                type: "module"
+                type: "module",
+                exports: {
+                  ".": {
+                    // NOTE: If first, `import` will override `production` with a `production`
+                    // condition in real Node.js runtime, so production _isn't_ matched here!
+                    "import": "./import.mjs",
+                    production: "./production.mjs"
+                  }
+                }
               }),
               "index.mjs": `
+                import three from "nested-three";
+                export default three;
+              `,
+              "import.mjs": `
                 import three from "nested-three";
                 export default three;
               `,
@@ -2665,16 +2677,17 @@ describe("lib/trace", () => {
                     exports: {
                       ".": {
                         bespoke: "./bespoke.mjs",
-                        // TODO: Why does order matter. Not picked up if behind `import`???
+                        // NOTE: If a custom condition comes _before_ `import`, then it is actually
+                        // matched in real Node.js runtime.
                         production: "./production.mjs",
                         "import": "./import.mjs"
                       }
                     }
                   }),
-                  "index.mjs": "export const three = 'three';",
-                  "import.mjs": "export const msg = 'import';",
-                  "production.mjs": "export const msg = 'production';",
-                  "bespoke.mjs": "export const msg = 'bespoke';"
+                  "index.mjs": "export const three = 'nested-three';",
+                  "import.mjs": "export const msg = 'nested-import';",
+                  "production.mjs": "export const msg = 'nested-production';",
+                  "bespoke.mjs": "export const msg = 'nested-bespoke';"
                 }
               }
             }
@@ -2694,6 +2707,7 @@ describe("lib/trace", () => {
           "node_modules/one/index.js",
           "node_modules/one/package.json",
           "node_modules/one/production.js",
+          "node_modules/three/import.mjs",
           "node_modules/three/index.mjs",
           "node_modules/three/node_modules/nested-three/bespoke.mjs",
           "node_modules/three/node_modules/nested-three/import.mjs",
