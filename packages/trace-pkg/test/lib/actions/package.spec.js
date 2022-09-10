@@ -533,6 +533,11 @@ describe("lib/actions/package", () => {
     });
   });
 
+  describe("conditions", () => {
+    it("TODO global conditions"); // TODO: IMPLEMENT
+    it("TODO package conditions"); // TODO: IMPLEMENT
+  });
+
   describe("allowMissing", () => {
     it("skips allowed missing packages", async () => {
       mock({
