@@ -534,8 +534,124 @@ describe("lib/actions/package", () => {
   });
 
   describe("conditions", () => {
-    it("TODO global conditions"); // TODO: IMPLEMENT
-    it("TODO package conditions"); // TODO: IMPLEMENT
+    it("handles user conditions", async () => {
+      mock({
+        src: {
+          "one.js": "module.exports = require('./one/code');",
+          one: {
+            "code.js": `
+              require('pkg');
+
+              module.exports = "code";
+            `
+          }
+        },
+        node_modules: {
+          pkg: {
+            "package.json": JSON.stringify({
+              name: "pkg",
+              main: "index.js",
+              exports: {
+                ".": {
+                  // `import` will win over `global` and `package` below
+                  "import": "./import.mjs",
+                  "global-cond": "./global.js",
+                  "package-cond": "./package.js",
+                  "default": "./default.js"
+                }
+              }
+            }),
+            "index.js": `
+              const nested = require("nested-pkg");
+
+              module.exports = nested;
+            `,
+            "global.js": `
+              module.exports = "nested-pkg-global";
+            `,
+            "default.js": `
+              module.exports = "nested-pkg-default";
+            `,
+            "package.js": `
+              module.exports = "pkg-package";
+            `,
+            "import.mjs": `
+              const msg = "pkg-import";
+              export default msg;
+            `,
+            node_modules: {
+              "nested-pkg": {
+                "package.json": JSON.stringify({
+                  name: "nested-pkg",
+                  main: "index.js",
+                  exports: {
+                    ".": {
+                      "global-cond": "./global.js",
+                      "package-cond": "./package.js",
+                      "import": "./import.mjs"
+                    }
+                  }
+                }),
+                "index.js": `
+                  module.exports = "nested-pkg-index";
+                `,
+                "global.js": `
+                  module.exports = "nested-pkg-global";
+                `,
+                "package.js": `
+                  module.exports = "nested-pkg-package";
+                `,
+                "import.mjs": `
+                  const msg = "nested-pkg-import";
+                  export default msg;
+                `
+              }
+            }
+          }
+        }
+      });
+
+      await createPackage({
+        opts: {
+          config: {
+            options: {
+              conditions: [
+                "global-cond"
+              ]
+            },
+            packages: {
+              "one.zip": {
+                trace: [
+                  "src/one.js"
+                ],
+                conditions: [
+                  "package-cond"
+                ]
+              }
+            }
+          }
+        }
+      });
+
+      expect(logStub).to.have.been.calledWithMatch("Created 1 packages:");
+
+      expect(await globby("*.zip")).to.eql([
+        "one.zip"
+      ]);
+      expect(zipContents("one.zip")).to.eql([
+        "node_modules/pkg/default.js",
+        "node_modules/pkg/import.mjs",
+        "node_modules/pkg/index.js",
+        "node_modules/pkg/node_modules/nested-pkg/global.js",
+        "node_modules/pkg/node_modules/nested-pkg/import.mjs",
+        "node_modules/pkg/node_modules/nested-pkg/index.js",
+        "node_modules/pkg/node_modules/nested-pkg/package.js",
+        "node_modules/pkg/node_modules/nested-pkg/package.json",
+        "node_modules/pkg/package.json",
+        "src/one.js",
+        "src/one/code.js"
+      ]);
+    });
   });
 
   describe("allowMissing", () => {

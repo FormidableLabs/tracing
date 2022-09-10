@@ -72,7 +72,7 @@ const parseConfig = async ({
       traceOptions: {
         includeSourceMaps: getBoolean(options.includeSourceMaps, pkgCfg.includeSourceMaps),
         ignores: smartConcat(options.ignores, pkgCfg.ignores),
-        conditions: smartConcat(options.ignconditionsores, pkgCfg.conditions),
+        conditions: smartConcat(options.conditions, pkgCfg.conditions),
         allowMissing: normalizeFileKeys({
           cwd,
           map: smartMerge(options.allowMissing, pkgCfg.allowMissing)
