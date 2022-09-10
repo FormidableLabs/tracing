@@ -138,6 +138,7 @@ const bundle = async ({
   traceOptions: {
     includeSourceMaps = false,
     ignores = [],
+    conditions = [],
     allowMissing = {},
     dynamic: { resolutions = {} }
   } = {},
@@ -149,6 +150,7 @@ const bundle = async ({
     srcPaths: tracePaths,
     includeSourceMaps,
     ignores,
+    conditions,
     allowMissing,
     extraImports: resolutions,
     bailOnMissing: true // TODO: Consider/ticket adding to misses and displaying together.

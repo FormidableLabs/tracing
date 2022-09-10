@@ -2098,12 +2098,10 @@ describe("lib/trace", () => {
 
               expect(dependencies).to.eql(fullPaths([
                 "node_modules/complicated/default.js",
-                "node_modules/complicated/development.js",
                 "node_modules/complicated/import.mjs",
                 "node_modules/complicated/local/two.mjs",
                 "node_modules/complicated/main.js",
                 "node_modules/complicated/package.json",
-                "node_modules/complicated/production.mjs",
                 "node_modules/subdep/default.js",
                 "node_modules/subdep/from-default.js",
                 "node_modules/subdep/from-main.js",
@@ -2149,11 +2147,9 @@ describe("lib/trace", () => {
 
               expect(dependencies).to.eql(fullPaths([
                 "node_modules/complicated/default.js",
-                "node_modules/complicated/development.js",
                 "node_modules/complicated/local/one.js",
                 "node_modules/complicated/main.js",
                 "node_modules/complicated/package.json",
-                "node_modules/complicated/production.mjs",
                 "node_modules/complicated/require.js",
                 // Note: All of the import paths are to sub-paths, and **not**
                 // the root package, so no defaults in play.
@@ -2286,12 +2282,10 @@ describe("lib/trace", () => {
               const { dependencies, misses } = await traceFile({ srcPath });
 
               expect(dependencies).to.eql(fullPaths([
-                "node_modules/complicated/development.js",
                 "node_modules/complicated/import.mjs",
                 "node_modules/complicated/local/one.js",
                 "node_modules/complicated/local/two.mjs",
                 "node_modules/complicated/package.json",
-                "node_modules/complicated/production.mjs",
                 "node_modules/complicated/require.js",
                 "node_modules/subdep/default.js",
                 "node_modules/subdep/from-require.js",
@@ -2598,6 +2592,136 @@ describe("lib/trace", () => {
             "node_modules/a-package/reference.mjs"
           ])
         );
+        expect(misses).to.eql({});
+      });
+    });
+
+    describe("user conditions", () => {
+      it("handles user conditions", async () => {
+        mock({
+          "first.js": `
+            const one = require("one");
+            const dynamicTwo = () => import("two");
+            const second = require("./second");
+          `,
+          "second.js": `
+            const one = require.resolve("one");
+
+            (async () => {
+              await import("three");
+            })();
+          `,
+          node_modules: {
+            one: {
+              "package.json": stringify({
+                name: "one",
+                main: "index.js",
+                exports: {
+                  ".": {
+                    bespoke: "./bespoke.js",
+                    production: "./production.js",
+                    "default": "./default.js"
+                  }
+                }
+              }),
+              "index.js": "module.exports = 'one';",
+              "default.js": "module.exports = 'default';",
+              "production.js": "module.exports = 'production';",
+              "bespoke.js": "module.exports = 'bespoke';"
+            },
+            two: {
+              "package.json": stringify({
+                name: "two",
+                main: "index.js",
+                exports: {
+                  ".": {
+                    bespoke: "./bespoke.js",
+                    production: "./production.js",
+                    require: "./require.js"
+                  }
+                }
+              }),
+              "index.js": "module.exports = 'two';",
+              "require.js": "module.exports = 'require';",
+              "production.js": "module.exports = 'production';",
+              "bespoke.js": "module.exports = 'bespoke';"
+            },
+            three: {
+              "package.json": stringify({
+                name: "three",
+                main: "index.mjs",
+                type: "module",
+                exports: {
+                  ".": {
+                    // NOTE: If first, `import` will override `production` with a `production`
+                    // condition in real Node.js runtime, so production _isn't_ matched here!
+                    "import": "./import.mjs",
+                    production: "./production.mjs"
+                  }
+                }
+              }),
+              "index.mjs": `
+                import three from "nested-three";
+                export default three;
+              `,
+              "import.mjs": `
+                import three from "nested-three";
+                export default three;
+              `,
+              node_modules: {
+                "nested-three": {
+                  "package.json": stringify({
+                    name: "nested-three",
+                    main: "index.mjs",
+                    type: "module",
+                    exports: {
+                      ".": {
+                        bespoke: "./bespoke.mjs",
+                        // NOTE: If a custom condition comes _before_ `import`, then it is actually
+                        // matched in real Node.js runtime.
+                        production: "./production.mjs",
+                        "import": "./import.mjs"
+                      }
+                    }
+                  }),
+                  "index.mjs": "export const three = 'nested-three';",
+                  "import.mjs": "export const msg = 'nested-import';",
+                  "production.mjs": "export const msg = 'nested-production';",
+                  "bespoke.mjs": "export const msg = 'nested-bespoke';"
+                }
+              }
+            }
+          }
+        });
+
+        const { dependencies, misses } = await traceFile({
+          srcPath: "first.js",
+          conditions: [
+            "bespoke",
+            "production"
+          ]
+        });
+        expect(dependencies).to.eql(fullPaths([
+          "node_modules/one/bespoke.js",
+          "node_modules/one/default.js",
+          "node_modules/one/index.js",
+          "node_modules/one/package.json",
+          "node_modules/one/production.js",
+          "node_modules/three/import.mjs",
+          "node_modules/three/index.mjs",
+          "node_modules/three/node_modules/nested-three/bespoke.mjs",
+          "node_modules/three/node_modules/nested-three/import.mjs",
+          "node_modules/three/node_modules/nested-three/index.mjs",
+          "node_modules/three/node_modules/nested-three/package.json",
+          "node_modules/three/node_modules/nested-three/production.mjs",
+          "node_modules/three/package.json",
+          "node_modules/two/bespoke.js",
+          "node_modules/two/index.js",
+          "node_modules/two/package.json",
+          "node_modules/two/production.js",
+          "node_modules/two/require.js",
+          "second.js"
+        ]));
         expect(misses).to.eql({});
       });
     });

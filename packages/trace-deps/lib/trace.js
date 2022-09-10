@@ -30,21 +30,33 @@ const RESOLVE_EXTS = [".js", ".json"];
 // https://github.com/FormidableLabs/trace-deps/issues/56
 const CONDITIONS = [
   // Node.js conditions
+  //
   // https://nodejs.org/api/packages.html#packages_conditional_exports
+  // > Node.js implements the following conditions, listed in order from most specific to
+  // > least specific as conditions should be defined:
+  // > - "node-addons"
+  // > - "node"
+  // > - "import"
+  // > - "require
+  // > - "default"
+  // NOTE: We don't include `node-addons` but could...
   "import",
   "require",
   "node",
   // Try `default` in both CJS + ESM modes.
   ["default", { require: true }],
-  ["default", { require: false }],
+  ["default", { require: false }]
 
   // Endorsed user conditions.
-  // https://nodejs.org/api/packages.html#packages_conditions_definitions
   //
-  // Note: We are ignoring
-  // - `browser`
-  "development",
-  "production"
+  // https://nodejs.org/api/packages.html#community-conditions-definitions
+  // > - "types"
+  // > - "deno"
+  // > - "browser"
+  // > - "development"
+  // > - "production"
+  //
+  // We do not default include any of these, but can be added with user-specified conditions.
 ];
 
 // Exports that disable modern ESM.
@@ -173,6 +185,7 @@ const _recurseDeps = async ({
   srcPaths,
   depPaths = [],
   ignores = [],
+  conditions = [],
   allowMissing = {},
   bailOnMissing = true,
   includeSourceMaps = false,
@@ -203,6 +216,7 @@ const _recurseDeps = async ({
       const traced = await traceFile({
         srcPath: depPath,
         ignores,
+        conditions,
         allowMissing,
         bailOnMissing,
         includeSourceMaps,
@@ -229,6 +243,7 @@ const _resolveDep = async ({
   depName,
   basedir,
   srcPath,
+  conditions,
   dependencies,
   extraDepKeys,
   addMisses,
@@ -339,12 +354,13 @@ const _resolveDep = async ({
           }
         });
 
-        CONDITIONS.forEach((cond) => {
+        CONDITIONS.concat(conditions).forEach((cond) => {
           let resolveOpts;
           if (Array.isArray(cond)) {
             resolveOpts = cond[1];
             cond = cond[0];
           }
+
 
           let relPath;
           try {
@@ -431,6 +447,7 @@ const _resolveDep = async ({
             depName,
             basedir,
             srcPath,
+            conditions,
             dependencies,
             extraDepKeys,
             addMisses,
@@ -487,6 +504,7 @@ const _resolveDep = async ({
  * @param {*}             opts                    options object
  * @param {string}        opts.srcPath            source file path to trace
  * @param {Array<string>} opts.ignores            list of package prefixes to ignore
+ * @param {Array<string>} opts.conditions         list of additional user conditions to trace
  * @param {Object}        opts.allowMissing       map packages to list of allowed missing package
  * @param {boolean}       opts.bailOnMissing      allow static dependencies to be missing
  * @param {boolean}       opts.includeSourceMaps  include source map paths in output
@@ -499,6 +517,7 @@ const _resolveDep = async ({
 const traceFile = async ({
   srcPath,
   ignores = [],
+  conditions = [],
   allowMissing = {},
   bailOnMissing = true,
   includeSourceMaps = false,
@@ -594,6 +613,7 @@ const traceFile = async ({
       depName,
       basedir,
       srcPath,
+      conditions,
       dependencies,
       extraDepKeys,
       addMisses,
@@ -628,6 +648,7 @@ const traceFile = async ({
   const recursed = await _recurseDeps({
     depPaths,
     ignores,
+    conditions,
     allowMissing,
     bailOnMissing,
     includeSourceMaps,
@@ -658,6 +679,7 @@ const traceFile = async ({
  * @param {*}             opts                    options object
  * @param {Array<string>} opts.srcPaths           source file paths to trace
  * @param {Array<string>} opts.ignores            list of package prefixes to ignore
+ * @param {Array<string>} opts.conditions         list of additional user conditions to trace
  * @param {Object}        opts.allowMissing       map packages to list of allowed missing package
  * @param {boolean}       opts.bailOnMissing      allow static dependencies to be missing
  * @param {boolean}       opts.includeSourceMaps  include source map paths in output
@@ -669,6 +691,7 @@ const traceFile = async ({
 const traceFiles = async ({
   srcPaths,
   ignores = [],
+  conditions = [],
   allowMissing = {},
   bailOnMissing = true,
   includeSourceMaps = false,
@@ -682,6 +705,7 @@ const traceFiles = async ({
   const results = await _recurseDeps({
     srcPaths,
     ignores,
+    conditions,
     allowMissing,
     bailOnMissing,
     includeSourceMaps,
