@@ -71,6 +71,7 @@ _Parameters_:
 * `srcPaths` (`Array<string>`): source file paths to trace
 * `ignores` (`Array<string>`): list of package prefixes to ignore
 * `conditions` (`Array<string>`): list of Node.js runtime import user conditions to trace.
+* `allowMissing` (`Object.<string, Array<string>`): Mapping of source file paths and package names/paths to permitted missing module prefixes.
 * `bailOnMissing` (`boolean`): Throw error if missing static import.
 * `includeSourceMaps` (`boolean`): Include source map file paths from control comments
 * `extraImports` (`Object.<string, Array<string>`): Mapping of files to additional imports to trace.
