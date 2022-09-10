@@ -1,6 +1,6 @@
 {
   "name": "trace-pkg",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "A dependency tracing packager.",
   "main": "index.js",
   "bin": {
@@ -40,7 +40,7 @@
     "globby": "^11.0.4",
     "jest-worker": "^28.1.1",
     "make-dir": "^3.1.0",
-    "trace-deps": "^0.4.10",
+    "trace-deps": "^0.5.0",
     "yaml": "^2.1.1",
     "yargs": "^17.5.1"
   },
