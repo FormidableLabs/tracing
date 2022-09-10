@@ -1,5 +1,13 @@
 Changes
 
+## 0.5.0
+
+### Minor Changes
+
+- - Feature (`trace-pkg`): Add `conditions` option. ([#12](https://github.com/FormidableLabs/tracing/pull/12))
+  - Feature (`trace-deps`): Add `conditions` parameter to `traceFile`/`traceFiles` to support user runtime loading conditions. (See [#trace-deps/56](https://github.com/FormidableLabs/trace-deps/issues/56))
+  - BREAKING: Remove `production` and `development` from set of default user conditions in package resolution.
+
 ## 0.4.11
 
 ### Patch Changes
