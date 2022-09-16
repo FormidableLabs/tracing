@@ -9,6 +9,7 @@ A collection of libraries and tools for faster and smaller Node.js file packagin
 
 - [`trace-deps` 🔬](./packages/trace-deps/): A dependency tracing tool for Node.js source files.
 - [`trace-pkg` 📦](./packages/trace-pkg/): A blazingly fast Node.js zip application packager for AWS Lambda, etc.
+- [`serverless-jetpack` 🚀](./packages/serverless-jetpack/): A faster JavaScript packager for Serverless applications.
 
 [actions_img]: https://github.com/FormidableLabs/tracing/workflows/CI/badge.svg
 [actions_site]: https://github.com/FormidableLabs/tracing/actions
