@@ -8,7 +8,7 @@ class Jetpack {
 
     // Initialize internal state.
     this.commands = this._getCommands();
-    this.config = this._getConfig( { handler: serverless.configSchemaHandler });
+    this.config = this._getConfig({ handler: serverless.configSchemaHandler });
     this.hooks = this._getHooks({ hooks: serverless.pluginManager.hooks });
   }
 
@@ -45,30 +45,36 @@ class Jetpack {
 
   _getConfig({ handler }) {
     const configName = this.constructor.name.toLocaleLowerCase();
+    const providerName = this.serverless.service.provider.name;
 
     // Define properties. All presently the same.
     // TODO(jetpack): Real properties, in a loop.
     handler.defineTopLevelProperty(configName, {
-      type: 'object',
+      type: "object",
       properties: {
-        global: { type: 'string' },
+        global: { type: "string" }
       }
     });
     handler.defineCustomProperties({
-      type: 'object',
+      type: "object",
       properties: {
         jetpack: {
-          type: 'object',
+          type: "object",
           properties: {
-            custom: { type: 'string' },
+            custom: { type: "string" }
           }
         }
       }
     });
-    handler.defineFunctionProperties(configName, {
-      type: 'object',
+    handler.defineFunctionProperties(providerName, {
+      type: "object",
       properties: {
-        "function": { type: 'string' },
+        jetpack: {
+          type: "object",
+          properties: {
+            "function": { type: "string" }
+          }
+        }
       }
     });
 
@@ -132,7 +138,7 @@ class Jetpack {
 
   async package() {
     const config = {
-      // global: this.serverless.service,
+      global: this.serverless.configurationInput.jetpack || {},
       custom: this.serverless.service.custom.jetpack || {},
       functions: Object.entries(this.serverless.service.functions).reduce((memo, [name, cfg]) => {
         memo[name] = cfg.jetpack || {};
@@ -141,13 +147,14 @@ class Jetpack {
     };
 
     // TODO(jetpack): Remove
+    const INDENT = 2;
     // eslint-disable-next-line no-console
     console.log("TODO(jetpack): package method called", JSON.stringify({
       config
-    }, null, 2));
+    }, null, INDENT));
 
     // TODO: HERE GLOBAL
-    console.log("TODO SERVICE", this.serverless.service)
+    // console.log("TODO SERVICE", this.serverless.service)
   }
 }
 

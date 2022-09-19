@@ -39,3 +39,9 @@ functions:
     # TODO(Jetpack):Document this option
     jetpack:
       function: "function config option" # TODO(Jetpack): REMOVE
+
+# TODO(Jetpack): We're at ye olde "layers require AWS auth" problem.
+# https://github.com/serverless/serverless/issues/8187
+# layers:
+#   layer-express:
+#     path: node_modules/express
