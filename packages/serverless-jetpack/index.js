@@ -7,43 +7,13 @@ class Jetpack {
     this.options = options;
 
     // Initialize internal state.
+    this._setConfigSchema({ handler: serverless.configSchemaHandler });
     this.commands = this._getCommands();
-    this.config = this._getConfig({ handler: serverless.configSchemaHandler });
     this.hooks = this._getHooks({ hooks: serverless.pluginManager.hooks });
   }
 
   // Constructor helpers.
-  _getCommands() {
-    return {
-      jetpack: {
-        usage: "Alternate Serverless packager",
-        commands: {
-          "package": {
-            usage: "Packages a Serverless service or function",
-            lifecycleEvents: [
-              "package"
-            ],
-            options: {
-              // TODO(jetpack): Implement function option
-              "function": {
-                usage: "Function name. Packages a single function (see 'deploy function')",
-                shortcut: "f",
-                type: "string"
-              },
-              // TODO(jetpack): Implement report option
-              report: {
-                usage: "Generate full bundle report",
-                shortcut: "r",
-                type: "boolean"
-              }
-            }
-          }
-        }
-      }
-    };
-  }
-
-  _getConfig({ handler }) {
+  _setConfigSchema({ handler }) {
     const configName = this.constructor.name.toLocaleLowerCase();
     const providerName = this.serverless.service.provider.name;
 
@@ -79,6 +49,36 @@ class Jetpack {
     });
 
     // TODO(jetpack): Also config for layers.
+  }
+
+  _getCommands() {
+    return {
+      jetpack: {
+        usage: "Alternate Serverless packager",
+        commands: {
+          "package": {
+            usage: "Packages a Serverless service or function",
+            lifecycleEvents: [
+              "package"
+            ],
+            options: {
+              // TODO(jetpack): Implement function option
+              "function": {
+                usage: "Function name. Packages a single function (see 'deploy function')",
+                shortcut: "f",
+                type: "string"
+              },
+              // TODO(jetpack): Implement report option
+              report: {
+                usage: "Generate full bundle report",
+                shortcut: "r",
+                type: "boolean"
+              }
+            }
+          }
+        }
+      }
+    };
   }
 
   _getHooks({ hooks }) {
@@ -121,6 +121,7 @@ class Jetpack {
     // approaches we considered. H/T to `@medikoo` for the strategy:
     // https://github.com/FormidableLabs/serverless-jetpack/pull/68#issuecomment-556987101
     return {
+      // Packaging hooks.
       // Use delayed hooks to guarantee we are **last** to run so other things
       // like the Serverless Enterprise plugin run before us.
       initialize: () => {
@@ -132,12 +133,23 @@ class Jetpack {
         });
       },
       // Our custom hook is fine with normal injection.
-      "jetpack:package:package": hook
+      "jetpack:package:package": hook,
+
+      // Configuration initialization hooks.
+      "after:package:initialize": this._setConfig.bind(this)
     };
   }
 
-  async package() {
-    const config = {
+  // Get resolved config values.
+  //
+  // **Note**: Only use in lifecycle events.
+  //
+  // See, e.g. https://www.serverless.com/framework/docs/guides/plugins/custom-configuration
+  // > Note: configuration values are only resolved after plugins are initialized.
+  // > Do not try to read configuration in the plugin constructor, as variables aren't resolved yet.
+  // > Read configuration in lifecycle events only.
+  _setConfig() {
+    this.__config = {
       global: this.serverless.configurationInput.jetpack || {},
       custom: this.serverless.service.custom.jetpack || {},
       functions: Object.entries(this.serverless.service.functions).reduce((memo, [name, cfg]) => {
@@ -145,12 +157,23 @@ class Jetpack {
         return memo;
       }, {})
     };
+  }
 
+  // Lazy getter
+  get _config() {
+    if (!this.__config) {
+      throw new Error("Configuration is not available yet.")
+    }
+
+    return this.__config;
+  }
+
+  async package() {
     // TODO(jetpack): Remove
     const INDENT = 2;
     // eslint-disable-next-line no-console
     console.log("TODO(jetpack): package method called", JSON.stringify({
-      config
+      config: this._config
     }, null, INDENT));
 
     // TODO: HERE GLOBAL
