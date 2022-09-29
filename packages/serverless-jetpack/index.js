@@ -84,6 +84,7 @@ class Jetpack {
   _getHooks({ hooks }) {
     const pluginName = this.constructor.name;
     const hook = this.package.bind(this);
+    const configHook = this._setConfig.bind(this);
 
     // The `ServerlessEnterprisePlugin` awkwardly wreaks havoc with alternative
     // packaging.
@@ -133,10 +134,11 @@ class Jetpack {
         });
       },
       // Our custom hook is fine with normal injection.
+      "before:jetpack:package:package": configHook,
       "jetpack:package:package": hook,
 
       // Configuration initialization hooks.
-      "after:package:initialize": this._setConfig.bind(this)
+      "after:package:initialize": configHook
     };
   }
 
@@ -162,7 +164,7 @@ class Jetpack {
   // Lazy getter
   get _config() {
     if (!this.__config) {
-      throw new Error("Configuration is not available yet.")
+      throw new Error("Configuration is not available yet.");
     }
 
     return this.__config;
