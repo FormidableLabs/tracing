@@ -9,6 +9,10 @@ use(sinonChai);
 
 global.expect = expect;
 
+// Disable colors in tests.
+process.env.NO_COLOR = "1";
+
+// TODO REMOVE.
 // Chalk
 // Disable chalk colors in tests.
 const chalk = require("chalk");

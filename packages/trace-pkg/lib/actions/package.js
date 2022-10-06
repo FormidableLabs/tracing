@@ -1,5 +1,6 @@
 "use strict";
 
+const pc = require("picocolors");
 const chalk = require("chalk");
 const yaml = require("yaml");
 const { Worker } = require("jest-worker");
@@ -14,9 +15,9 @@ const { summarizeCollapsed } = require("../trace/collapsed");
 // ----------------------------------------------------------------------------
 // Helpers: Collapsed
 // ----------------------------------------------------------------------------
-const LINK_COLLAPSED_MISSES = chalk.gray.underline(
+const LINK_COLLAPSED_MISSES = pc.gray(pc.underline(
   "https://npm.im/trace-pkg#handling-collapsed-files"
-);
+));
 
 const collapsedMsg = ({ key, type, numPkgs, numConflicts, numFiles }) =>
   `${chalk `Collapsed ${type} in {cyan ${key}} (`
@@ -42,7 +43,7 @@ const summarizeAndLogCollapsed = ({ results }) => {
 
       warn(
         collapsedMsg({ key, type: "sources", ...summary[key].sources })
-        + srcPaths.map((p) => chalk.gray(p)).join(", ")
+        + srcPaths.map((p) => pc.gray(p)).join(", ")
       );
     }
 
@@ -62,7 +63,7 @@ const summarizeAndLogCollapsed = ({ results }) => {
 
       warn(
         collapsedMsg({ key, type: "dependencies", ...summary[key].dependencies })
-        + depNames.map((p) => chalk.gray(p)).join(", ")
+        + depNames.map((p) => pc.gray(p)).join(", ")
       );
     }
   });
@@ -98,9 +99,9 @@ const handleCollapsed = ({ packages, summary }) => {
 // ----------------------------------------------------------------------------
 // Helpers: Misses
 // ----------------------------------------------------------------------------
-const LINK_DYNAMIC_MISSES = chalk.gray.underline(
+const LINK_DYNAMIC_MISSES = pc.gray(pc.underline(
   "https://npm.im/trace-pkg#handling-dynamic-import-misses"
-);
+));
 
 const logMisses = ({ results }) => {
   let foundDynamicMisses = false;
@@ -140,7 +141,8 @@ const handleMisses = ({ packages, results }) => {
 
     if (bail && missed.length) {
       unresolvedError = true;
-      error(chalk `Unresolved dynamic misses in {cyan ${key}}: {gray ${JSON.stringify(missed)}}`);
+      error(
+        chalk `Unresolved dynamic misses in {cyan ${key}}: {gray ${JSON.stringify(missed)}}`);
     }
   });
 
@@ -200,11 +202,8 @@ const bundleReport = ({ config, concurrency, dryRun, results }) => {
 
   /* eslint-enable no-magic-numbers */
   return chalk `
-{blue ## Configuration}
-
-${configStr}
-{blue ## Output}
-${reportStr}`.trim();
+{blue ## Configuration}${"\n\n"}${configStr}
+{blue ## Output}${"\n"}${reportStr}`.trim();
 };
 
 // ----------------------------------------------------------------------------
