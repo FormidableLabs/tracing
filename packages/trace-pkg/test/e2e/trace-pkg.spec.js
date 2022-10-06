@@ -2,8 +2,9 @@
 
 const os = require("os");
 const path = require("path");
+const { promisify } = require("util");
+const exec = promisify(require("child_process").exec);
 
-const execa = require("execa");
 const fs = require("fs-extra");
 const uuid = require("uuid");
 const globby = require("globby");
@@ -37,9 +38,8 @@ describe("e2e/trace-pkg", () => {
       const cwd = path.join(tmpDir, "simple");
       await fs.copy(path.join(FIXTURES_DIR, "simple"), cwd);
 
-      const { stdout, stderr } = await execa(
-        "node",
-        [CLI, "-c", "trace-pkg.yml", "--concurrency=0"],
+      const { stdout, stderr } = await exec(
+        ["node", CLI, "-c", "trace-pkg.yml", "--concurrency=0"].join(" "),
         { cwd }
       );
 
@@ -77,9 +77,8 @@ describe("e2e/trace-pkg", () => {
       await fs.copy(path.join(FIXTURES_DIR, "error"), cwd);
 
       let err;
-      await execa(
-        "node",
-        [CLI, "-c", "trace-pkg.yml", "--concurrency=0"],
+      await exec(
+        ["node", CLI, "-c", "trace-pkg.yml", "--concurrency=0"].join(" "),
         { cwd }
       ).catch((e) => { err = e; });
 
