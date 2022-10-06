@@ -1,12 +1,12 @@
 "use strict";
 
+const { randomUUID } = require("crypto");
 const os = require("os");
 const path = require("path");
 const { promisify } = require("util");
 const exec = promisify(require("child_process").exec);
 
 const fs = require("fs-extra");
-const uuid = require("uuid");
 const globby = require("globby");
 
 const { zipContents } = require("../util/file");
@@ -21,7 +21,7 @@ describe("e2e/trace-pkg", () => {
   let tmpDir;
 
   beforeEach(async () => {
-    tmpDir = path.join(TMP, "trace-pkg", uuid.v4());
+    tmpDir = path.join(TMP, "trace-pkg", randomUUID());
     await fs.ensureDir(tmpDir);
   });
 
