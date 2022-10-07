@@ -56,7 +56,6 @@ importers:
     specifiers:
       adm-zip: ^0.5.9
       archiver: ^5.3.1
-      chalk: ^4.1.2
       colorize-template: ^1.0.0
       fs-extra: ^10.1.0
       globby: ^11.0.4
@@ -68,7 +67,6 @@ importers:
       yargs: ^17.6.0
     dependencies:
       archiver: 5.3.1
-      chalk: 4.1.2
       colorize-template: 1.0.0
       globby: 11.1.0
       jest-worker: 29.1.2

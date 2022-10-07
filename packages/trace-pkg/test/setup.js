@@ -11,11 +11,3 @@ global.expect = expect;
 
 // Disable colors in tests.
 process.env.NO_COLOR = "1";
-
-// TODO REMOVE.
-// Chalk
-// Disable chalk colors in tests.
-const chalk = require("chalk");
-chalk.level = 0;
-// Early require to get around mock-fs
-require("chalk/source/templates");
