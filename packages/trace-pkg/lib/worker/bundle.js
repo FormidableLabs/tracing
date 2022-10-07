@@ -115,6 +115,10 @@ const createZip = async ({ cwd, outputPath, fileObjs }) => {
 
       // Add all files.
       fileObjs.forEach(({ filePath, data, stat: { mode } }) => {
+        // TODO(pnpm): Need to infer if symlink and then handle that.
+        // See: https://www.archiverjs.com/docs/archiver#symlink
+        // NOTE: We have stat info here!
+
         // Manually read and set date for deterministic bundles.
         //
         // See: https://github.com/FormidableLabs/serverless-jetpack/issues/7
