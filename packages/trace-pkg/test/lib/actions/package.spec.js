@@ -1417,6 +1417,107 @@ describe("lib/actions/package", () => {
     });
   });
 
+  describe("packagers", () => {
+    describe("pnpm", () => {
+      it("handles basic pnpm install", async () => {
+        mock({
+          "package.json": JSON.stringify({}),
+          packages: {
+            one: {
+              "index.js": "module.exports = require('./src/dep');",
+              src: {
+                "dep.js": `
+                  require('pkg2');
+                  module.exports = require('pkg1');
+                `
+              },
+              "package.json": JSON.stringify({
+                main: "index.js"
+              }),
+              node_modules: {
+                "pkg1": mock.symlink({
+                  path: "../../../node_modules/.pnpm/pkg1@1.0.0/node_modules/pkg1"
+                }),
+                "pkg2": mock.symlink({
+                  path: "../../../node_modules/.pnpm/pkg2@2.0.0/node_modules/pkg2"
+                })
+              }
+            }
+          },
+          node_modules: {
+            ".pnpm": {
+              "pkg1@1.0.0": {
+                node_modules: {
+                  "pkg1": {
+                    "package.json": JSON.stringify({
+                      main: "index.js"
+                    }),
+                    "index.js": "module.exports = 'pkg1';"
+                  }
+                }
+              },
+              "pkg2@2.0.0": {
+                node_modules: {
+                  "pkg2": {
+                    "package.json": JSON.stringify({
+                      main: "index.js",
+                      dependencies: {
+                        "pkg3": "3.0.0"
+                      }
+                    }),
+                    "index.js": `
+                      // TODO HERE require('pkg3');
+                      module.exports = 'pkg2';
+                    `
+                  },
+                  "pkg3": mock.symlink({
+                    path: "../../pkg3@3.0.0/node_modules/pkg3"
+                  })
+                }
+              },
+              "pkg3@3.0.0": {
+                node_modules: {
+                  "pkg3": {
+                    "package.json": JSON.stringify({
+                      main: "index.js"
+                    }),
+                    "index.js": "module.exports = 'pkg3';"
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        await createPackage({
+          opts: {
+            config: {
+              packages: {
+                one: {
+                  output: ".build/one.zip",
+                  trace: [
+                    "packages/one/index.js"
+                  ]
+                }
+              }
+            }
+          }
+        });
+
+        expect(logStub).to.have.been.calledWithMatch("Created 1 packages:");
+
+        expect(await globby(".build/*.zip")).to.eql([
+          ".build/one.zip"
+        ]);
+        expect(zipContents(".build/one.zip")).to.eql([
+          "packages/one/index.js",
+          "packages/one/package.json",
+          "packages/one/src/dep.js"
+        ]);
+      });
+    });
+  });
+
   // https://github.com/FormidableLabs/trace-pkg/issues/11
   it("packages projects with symlinks"); // TODO(11)
   it("packages monorepos with symlinks"); // TODO(11)
