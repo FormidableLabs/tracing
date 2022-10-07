@@ -56,7 +56,6 @@ importers:
     specifiers:
       adm-zip: ^0.5.9
       archiver: ^5.3.1
-      colorize-template: ^1.0.0
       fs-extra: ^10.1.0
       globby: ^11.0.4
       jest-worker: ^29.1.2
@@ -67,7 +66,6 @@ importers:
       yargs: ^17.6.0
     dependencies:
       archiver: 5.3.1
-      colorize-template: 1.0.0
       globby: 11.1.0
       jest-worker: 29.1.2
       make-dir: 3.1.0
@@ -1203,10 +1201,6 @@ packages:
 
   /color-name/1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
-
-  /colorize-template/1.0.0:
-    resolution: {integrity: sha512-beJ9v9RjpbYZ8OdwJgIRZD3YUkZPXmi1MK+yX0J24UupKVHa9yk0jiARgt2i6MBX6AKjYA0SNsBn65bUPuVQiw==}
-    dev: false
 
   /commondir/1.0.1:
     resolution: {integrity: sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==}
