@@ -387,7 +387,13 @@ const _resolveDep = async ({
 
       pkgPaths.push(pkgfile);
       return pkg;
-    }
+    },
+    // TODO HERE: Can't actually do this because while we do include all the real files,
+    // we're missing the symlinks to make this work...
+    // IDEAS:
+    // 1. Run _two_ times with both to see if we can infer the base link.
+    // 2. Check where this is run form and infer a link vs. real file???
+    preserveSymlinks: false
   })
     // **Special Case #1**: Handle missing `package.json:main` or old CJS path
     // miss with extra, early catch + re-throw

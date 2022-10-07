@@ -1466,7 +1466,7 @@ describe("lib/actions/package", () => {
                       }
                     }),
                     "index.js": `
-                      // TODO HERE require('pkg3');
+                      require('pkg3');
                       module.exports = 'pkg2';
                     `
                   },
