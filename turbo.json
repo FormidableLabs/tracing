@@ -1,0 +1,15 @@
+{
+  "pipeline": {
+    "lint": {
+      "outputs": []
+    },
+    "test": {
+      "outputs": [],
+      "inputs": ["test/**/*.js", "{lib,bin}/**/*.js", "*.{js,json}"]
+    },
+    "test:cov": {
+      "outputs": ["coverage"],
+      "inputs": ["test/**/*.js", "{lib,bin}/**/*.js", "*.{js,json}"]
+    }
+  }
+}

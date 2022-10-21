@@ -21,6 +21,7 @@ importers:
       nyc: ^15.1.0
       sinon: ^14.0.1
       sinon-chai: ^3.7.0
+      turbo: ^1.6.0
     devDependencies:
       '@babel/core': 7.19.3
       '@babel/eslint-parser': 7.19.1_ogeofmzlraie6c2b5yqacorv6u
@@ -39,6 +40,7 @@ importers:
       nyc: 15.1.0
       sinon: 14.0.1
       sinon-chai: 3.7.0_chai@4.3.6+sinon@14.0.1
+      turbo: 1.6.0
 
   packages/trace-deps:
     specifiers:
@@ -3595,6 +3597,67 @@ packages:
       strip-ansi: 6.0.1
       wcwidth: 1.0.1
       yargs: 17.6.0
+    dev: true
+
+  /turbo-darwin-64/1.6.0:
+    resolution: {integrity: sha512-rQJruB6K3bdpK7T09Wg83irLvuZXnibLRakR3Qi0QbmfHbZgMsYfr0RcpuDdOauhDGOC4tuTbcn6Ab7znOPueQ==}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-darwin-arm64/1.6.0:
+    resolution: {integrity: sha512-Y82V2vDiz3+iL2UP6GBqfYUo9onP90jlureATqiCGN2MZ6+mz/xmAx0HPnexyQYDKAa5NvqmI7QBq8NcRzVhPw==}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-linux-64/1.6.0:
+    resolution: {integrity: sha512-J+6xc0Jo5rCa3XHZVebILKKCQKw0Ka6SE3/fY2gZRGjJgrCl3mboBbX/xy35kPQuuBjcxmJj4x01UfLfaSYwQg==}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-linux-arm64/1.6.0:
+    resolution: {integrity: sha512-foxQzPRTjOTFQnaMRKa4uhlfZGYtFCzFr0lr61mJOQp9G+ygqpvyYvhMvhF69nvPh8STSnVSTJkQUNM+DUAA2w==}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-windows-64/1.6.0:
+    resolution: {integrity: sha512-nyhp9LNgi1SiAqHZWRdZqcemwGrqeKSiro00lB0XkMYZiLL91E8ZClAoGuqSCfYHTXaffjTxdJRihfot2G/Y+g==}
+    cpu: [x64]
+    os: [win32]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-windows-arm64/1.6.0:
+    resolution: {integrity: sha512-ORLdBUxM/ob+E623CHjQyf1mxpvc3SF862ui4Q4BA5ZxqkpxHuDLCaVnC/62cez8GdXRW/Twl0qqLoIbAoWIsA==}
+    cpu: [arm64]
+    os: [win32]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo/1.6.0:
+    resolution: {integrity: sha512-QVl4tfKExeI88zAWbspEJUeMYfo6G751C2QvMl9EORci1VNtARJ2AtYXtJSrJta5n6xsCsusgXrVEHG1iPv5UA==}
+    hasBin: true
+    requiresBuild: true
+    optionalDependencies:
+      turbo-darwin-64: 1.6.0
+      turbo-darwin-arm64: 1.6.0
+      turbo-linux-64: 1.6.0
+      turbo-linux-arm64: 1.6.0
+      turbo-windows-64: 1.6.0
+      turbo-windows-arm64: 1.6.0
     dev: true
 
   /type-check/0.4.0:

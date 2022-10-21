@@ -18,6 +18,7 @@ coverage
 # Wireit + caches
 .wireit
 .eslintcache
+.turbo
 
 # Ignore all yarn2+
 .yarn/*
