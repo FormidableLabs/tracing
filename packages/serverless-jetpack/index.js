@@ -14,17 +14,24 @@ class Jetpack {
 
   // Constructor helpers.
   _setConfigSchema({ handler }) {
-    const configName = this.constructor.name.toLocaleLowerCase();
-    const providerName = this.serverless.service.provider.name;
+    // We're presently keeping just `custom` and `function` configuration properties
+    // as that's what existing Jetpack has. Here's a snippet of how to add a top-level
+    // property for later:
+    //
+    // ```js
+    // // Define the top level property.
+    // const configName = this.constructor.name.toLocaleLowerCase();
+    // handler.defineTopLevelProperty(configName, {
+    //   type: "object",
+    //   properties: {
+    //     global: { type: "string" }
+    //   }
+    // });
+    // // Accessible within lifecycle via:
+    // this.serverless.configurationInput.jetpack
+    // ```
 
-    // Define properties. All presently the same.
-    // TODO(jetpack): Real properties, in a loop.
-    handler.defineTopLevelProperty(configName, {
-      type: "object",
-      properties: {
-        global: { type: "string" }
-      }
-    });
+    // Custom.
     handler.defineCustomProperties({
       type: "object",
       properties: {
@@ -36,6 +43,9 @@ class Jetpack {
         }
       }
     });
+
+    // Function.
+    const providerName = this.serverless.service.provider.name;
     handler.defineFunctionProperties(providerName, {
       type: "object",
       properties: {
@@ -152,7 +162,6 @@ class Jetpack {
   // > Read configuration in lifecycle events only.
   _setConfig() {
     this.__config = {
-      global: this.serverless.configurationInput.jetpack || {},
       custom: this.serverless.service.custom.jetpack || {},
       functions: Object.entries(this.serverless.service.functions).reduce((memo, [name, cfg]) => {
         memo[name] = cfg.jetpack || {};

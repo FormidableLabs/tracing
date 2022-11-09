@@ -13,13 +13,6 @@ plugins:
   modules:
     - serverless-jetpack
 
-# Configuration
-# TODO(Jetpack): Document this change
-# TODO(Jetpack): Do validation on config
-# https://www.serverless.com/framework/docs/guides/plugins/custom-configuration#validating-the-configuration
-jetpack:
-  global: "global config option" # TODO(Jetpack): REMOVE
-
 provider:
   name: aws
   runtime: nodejs16.x
