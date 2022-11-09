@@ -1,5 +1,11 @@
 Changes
 
+## 0.5.1
+
+### Patch Changes
+
+- Replace chalk with picocolors (see [#9](https://github.com/FormidableLabs/tracing/issues/9)). ([#21](https://github.com/FormidableLabs/tracing/pull/21))
+
 ## 0.5.0
 
 ### Major Changes

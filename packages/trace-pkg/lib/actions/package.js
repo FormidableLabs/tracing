@@ -1,6 +1,6 @@
 "use strict";
 
-const chalk = require("chalk");
+const pc = require("picocolors");
 const yaml = require("yaml");
 const { Worker } = require("jest-worker");
 
@@ -14,15 +14,16 @@ const { summarizeCollapsed } = require("../trace/collapsed");
 // ----------------------------------------------------------------------------
 // Helpers: Collapsed
 // ----------------------------------------------------------------------------
-const LINK_COLLAPSED_MISSES = chalk.gray.underline(
+const LINK_COLLAPSED_MISSES = pc.gray(pc.underline(
   "https://npm.im/trace-pkg#handling-collapsed-files"
-);
+));
 
-const collapsedMsg = ({ key, type, numPkgs, numConflicts, numFiles }) =>
-  `${chalk `Collapsed ${type} in {cyan ${key}} (`
-  + (numPkgs ? chalk `{gray {green ${numPkgs}} packages, }` : "")
-  + chalk `{gray {red ${numConflicts}} conflicts, {yellow ${numFiles}} files}`
-  }): `;
+const collapsedMsg = ({ key, type, numPkgs, numConflicts, numFiles }) => {
+  const pkgs = numPkgs ? `${pc.green(numPkgs)}${pc.gray(" packages, ")}` : "";
+  const conflicts = `${pc.red(numConflicts)}${pc.gray(" conflicts, ")}`;
+  const files = `${pc.red(numFiles)}${pc.gray(" files")}`;
+  return `Collapsed ${type} in ${pc.cyan(key)} (${pkgs}${conflicts}${files}): `;
+};
 
 // Summarize and log out collapsed information.
 const summarizeAndLogCollapsed = ({ results }) => {
@@ -42,7 +43,7 @@ const summarizeAndLogCollapsed = ({ results }) => {
 
       warn(
         collapsedMsg({ key, type: "sources", ...summary[key].sources })
-        + srcPaths.map((p) => chalk.gray(p)).join(", ")
+        + srcPaths.map((p) => pc.gray(p)).join(", ")
       );
     }
 
@@ -62,7 +63,7 @@ const summarizeAndLogCollapsed = ({ results }) => {
 
       warn(
         collapsedMsg({ key, type: "dependencies", ...summary[key].dependencies })
-        + depNames.map((p) => chalk.gray(p)).join(", ")
+        + depNames.map((p) => pc.gray(p)).join(", ")
       );
     }
   });
@@ -83,9 +84,8 @@ const handleCollapsed = ({ packages, summary }) => {
     if (pkg.collapsed.bail && totalConflicts > 0) {
       collapsedError = true;
       error(
-        chalk `Collapsed file conflicts in {cyan ${key}}: `
-        + chalk `({gray {red ${totalConflicts}} total conflicts})`)
-      ;
+        `Collapsed file conflicts in ${pc.cyan(key)}: `
+        + `(${pc.gray(`${pc.red(totalConflicts)} total conflicts`)})`);
     }
   });
 
@@ -98,9 +98,9 @@ const handleCollapsed = ({ packages, summary }) => {
 // ----------------------------------------------------------------------------
 // Helpers: Misses
 // ----------------------------------------------------------------------------
-const LINK_DYNAMIC_MISSES = chalk.gray.underline(
+const LINK_DYNAMIC_MISSES = pc.gray(pc.underline(
   "https://npm.im/trace-pkg#handling-dynamic-import-misses"
-);
+));
 
 const logMisses = ({ results }) => {
   let foundDynamicMisses = false;
@@ -110,20 +110,20 @@ const logMisses = ({ results }) => {
       foundDynamicMisses = true;
       const dynamicMisses = Object.entries(missed)
         .map(([missFile, missList]) =>
-          chalk `- {yellow ${missFile}}\n  {gray ${missList.join("\n  ")}}`
+          `- ${pc.yellow(missFile)}\n  ${pc.gray(missList.join("\n  "))}`
         )
         .join("\n");
 
-      warn(chalk `Dynamic misses in {cyan ${key}}:\n${dynamicMisses}`);
+      warn(`Dynamic misses in ${pc.cyan(key)}:\n${dynamicMisses}`);
     }
 
     // Source map misses (just log).
     if (sourceMaps.length) {
       const sourceMapMisses = sourceMaps
-        .map((file) => chalk `- {gray ${file}}`)
+        .map((file) => `- ${pc.gray(file)}`)
         .join("\n");
 
-      warn(chalk `Missing source map files in {cyan ${key}}:\n${sourceMapMisses}`);
+      warn(`Missing source map files in ${pc.cyan(key)}:\n${sourceMapMisses}`);
     }
   });
 
@@ -140,7 +140,8 @@ const handleMisses = ({ packages, results }) => {
 
     if (bail && missed.length) {
       unresolvedError = true;
-      error(chalk `Unresolved dynamic misses in {cyan ${key}}: {gray ${JSON.stringify(missed)}}`);
+      error(
+        `Unresolved dynamic misses in ${pc.cyan(key)}: ${pc.gray(JSON.stringify(missed))}`);
     }
   });
 
@@ -174,12 +175,12 @@ const prettyResults = (results) => {
 
 const highlight = (indent, color, prefix = "") => [
   new RegExp(`^([ ]{${indent}}[^ ]{1}.*):`, "gm"),
-  (_, val) => chalk `${prefix}{${color} ${val}}:`
+  (_, val) => `${prefix}${pc[color](val)}:`
 ];
 const highlightMiss = () => [
   /^( {8}- \")(\[[0-9]+:[0-9]+\])(: )(.*?)(\")$/gm,
   // eslint-disable-next-line max-params
-  (_, v1, v2, v3, v4, v5) => chalk `${v1}{yellow ${v2}}${v3}{gray ${v4}}${v5}`
+  (_, v1, v2, v3, v4, v5) => `${v1}${pc.yellow(v2)}${v3}${pc.gray(v4)}${v5}`
 ];
 
 const bundleReport = ({ config, concurrency, dryRun, results }) => {
@@ -199,11 +200,11 @@ const bundleReport = ({ config, concurrency, dryRun, results }) => {
     .replace(...highlightMiss());
 
   /* eslint-enable no-magic-numbers */
-  return chalk `
-{blue ## Configuration}
+  return `
+${pc.blue("## Configuration")}
 
 ${configStr}
-{blue ## Output}
+${pc.blue("## Output")}
 ${reportStr}`.trim();
 };
 
@@ -252,7 +253,8 @@ const createPackage = async ({ opts: { config, concurrency, report, dryRun } = {
   const runner = createRunner({ concurrency });
   await runner.run(Object.entries(plan.packages).map(([key, pkg]) => async () => {
     const { cwd, output, trace, traceOptions, include } = pkg;
-    debug(chalk `{gray [${runner.isWorker ? "w" : "s"}]} Start bundle for: {cyan ${key}}`);
+    const worker = pc.gray(`[${runner.isWorker ? "w" : "s"}]`);
+    debug(`${worker} Start bundle for: ${pc.cyan(key)}`);
 
     const bundleResults = await runner.bundle({
       cwd,
@@ -264,8 +266,8 @@ const createPackage = async ({ opts: { config, concurrency, report, dryRun } = {
     });
 
     const { workerId } = bundleResults.output;
-    const mode = workerId ? chalk `{gray [w{green ${workerId}}]}` : chalk `{gray [s]}`;
-    debug(chalk `${mode} Finished bundle for {cyan ${key}}`);
+    const mode = pc.gray(workerId ? `[w${pc.green(workerId)}]` : "[s]");
+    debug(`${mode} Finished bundle for ${pc.cyan(key)}`);
 
     // Update results.
     Object.assign(rawResults[key], bundleResults);
@@ -283,11 +285,11 @@ const createPackage = async ({ opts: { config, concurrency, report, dryRun } = {
     // eslint-disable-next-line no-console
     console.log(bundleReport({ config, concurrency, dryRun, results }));
   } else {
-    const prefix = dryRun ? chalk `{gray [dry-run]} Would create` : "Created";
-    log(chalk `${prefix} {green ${Object.keys(results).length}} packages:`);
+    const prefix = dryRun ? `${pc.gray("[dry-run]")} Would create` : "Created";
+    log(`${prefix} ${pc.green(Object.keys(results).length)} packages:`);
 
     Object.entries(results).forEach(([key, { output: { relPath, files } }]) => {
-      log(chalk `- {cyan ${key}}: ${relPath} ({green ${files.length}} {gray files})`);
+      log(`- ${pc.cyan(key)}: ${relPath} (${pc.green(files.length)} ${pc.gray("files")})`);
     });
   }
 

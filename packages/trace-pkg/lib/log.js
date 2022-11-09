@@ -2,7 +2,7 @@
 
 "use strict";
 
-const { yellow, red } = require("chalk");
+const { yellow, red } = require("picocolors");
 const util = require("util");
 
 let _enabled = true;
