@@ -152,9 +152,113 @@ describe("lib/trace", () => {
     });
 
     describe("ignoreExtensions", () => {
-      it("ignores built-in ignored extensions"); // TODO(EXT)
-      // TODO(EXT): two part extension
-      it("ignores mixed options extensions"); // TODO(EXT)
+      it("skips tracing for built-in ignored extensions", async () => {
+        mock({
+          "hi.js": `
+            require("one");
+          `,
+          node_modules: {
+            one: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("./native.node");
+
+                module.exports = {
+                  one: () => "one",
+                  two: () => require("two").two
+                };
+              `,
+              "native.node": "\\ NODE"
+            },
+            two: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("./jsony.json");
+
+                module.exports = {
+                  two: () => "two"
+                };
+              `,
+              "jsony.json": JSON.stringify({ jsony: "json " })
+            }
+          }
+        });
+
+        const { dependencies, misses } = await traceFile({
+          srcPath: "hi.js"
+        });
+        expect(dependencies).to.eql(fullPaths([
+          "node_modules/one/index.js",
+          "node_modules/one/native.node",
+          "node_modules/one/package.json",
+          "node_modules/two/index.js",
+          "node_modules/two/jsony.json",
+          "node_modules/two/package.json"
+        ]));
+        expect(misses).to.eql({});
+      });
+
+      // TODO(EXT): IMPLEMENT THIS
+      it.skip("skips tracing for custom extensions", async () => {
+        mock({
+          "hi.js": `
+            require("one");
+            require("./hi.graphql");
+          `,
+          "hi.graphql": "\\explode GRAPHQL",
+          node_modules: {
+            one: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("./native.node");
+                require("./data.graphql");
+
+                module.exports = {
+                  one: () => "one",
+                  two: () => require("two").two
+                };
+              `,
+              "data.graphql": "\\explode GRAPHQL",
+              "native.node": "\\explode NODE"
+            },
+            two: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("./jsony.json");
+                require("./source.js.map");
+
+                module.exports = {
+                  two: () => "two"
+                };
+              `,
+              "jsony.json": JSON.stringify({ jsony: "json " }),
+              "source.js.map": "\\explode SOURCE_MAP"
+            }
+          }
+        });
+
+        const { dependencies, misses } = await traceFile({
+          srcPath: "hi.js",
+          ignoreExtensions: [".graphql", ".js.map"]
+        });
+        expect(dependencies).to.eql(fullPaths([
+          "node_modules/one/index.js",
+          "node_modules/one/native.node",
+          "node_modules/one/package.json",
+          "node_modules/two/index.js",
+          "node_modules/two/jsony.json",
+          "node_modules/two/package.json"
+        ]));
+        expect(misses).to.eql({});
+      });
     });
 
     describe("ignores", () => {

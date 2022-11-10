@@ -25,7 +25,7 @@ Trace and return on-disk locations of all file dependencies from a source file.
 _Parameters_:
 
 * `srcPath` (`string`): source file path to trace
-* `ignoreExtensions` (`Array<string>`): A set of file extensions (e.g., `.map` or `.graphql`) to skip tracing on.  These are added to our built-in extensions to skip of `.json` and `.node`.
+* `ignoreExtensions` (`Array<string>`): A set of file extensions (e.g., `.map` or `.graphql`) to skip tracing on. These files will still be included in the bundle. These are added to our built-in extensions to skip of `.json` and `.node`.
 * `ignores` (`Array<string>`): list of package prefixes to ignore tracing entirely
 * `conditions` (`Array<string>`): list of Node.js runtime import [user conditions](https://nodejs.org/api/packages.html#resolving-user-conditions) to trace in addition to our default built-in Node.js conditions of `import`, `require`, `node`, and `default`.
 * `allowMissing` (`Object.<string, Array<string>`): Mapping of (1) absolute source file paths and (2) package name or relative file path keys to permitted missing module prefixes values.
