@@ -202,8 +202,7 @@ describe("lib/trace", () => {
         expect(misses).to.eql({});
       });
 
-      // TODO(EXT): IMPLEMENT THIS
-      it.skip("skips tracing for custom extensions", async () => {
+      it("skips tracing for custom extensions", async () => {
         mock({
           "hi.js": `
             require("one");
@@ -250,12 +249,15 @@ describe("lib/trace", () => {
           ignoreExtensions: [".graphql", ".js.map"]
         });
         expect(dependencies).to.eql(fullPaths([
+          "hi.graphql",
+          "node_modules/one/data.graphql",
           "node_modules/one/index.js",
           "node_modules/one/native.node",
           "node_modules/one/package.json",
           "node_modules/two/index.js",
           "node_modules/two/jsony.json",
-          "node_modules/two/package.json"
+          "node_modules/two/package.json",
+          "node_modules/two/source.js.map"
         ]));
         expect(misses).to.eql({});
       });

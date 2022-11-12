@@ -211,7 +211,7 @@ const _recurseDeps = async ({
       _tracedDepPaths.add(depPath);
 
       // Short-circuit: Is it a known non-traceable extension?
-      if (_ignoreExtensions.has(path.extname(depPath))) { continue; }
+      if (_ignoreExtensions.some((ext) => depPath.endsWith(ext))) { continue; }
 
       // Recurse.
       // eslint-disable-next-line no-use-before-define
@@ -538,7 +538,7 @@ const traceFile = async ({
   }
 
   // Parameters
-  _ignoreExtensions = _ignoreExtensions || new Set(NOT_JS_EXTS.concat(ignoreExtensions));
+  _ignoreExtensions = _ignoreExtensions || NOT_JS_EXTS.concat(ignoreExtensions);
   _extraImports = _extraImports || normalizeExtraImports(extraImports);
 
   // Get source.
@@ -714,7 +714,7 @@ const traceFiles = async ({
   _extraImports,
   _tracedDepPaths = new Set()
 } = {}) => {
-  _ignoreExtensions = _ignoreExtensions || new Set(NOT_JS_EXTS.concat(ignoreExtensions));
+  _ignoreExtensions = _ignoreExtensions || NOT_JS_EXTS.concat(ignoreExtensions);
   _extraImports = _extraImports || normalizeExtraImports(extraImports);
 
   // Recurse all source files.
