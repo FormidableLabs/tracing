@@ -547,8 +547,6 @@ describe("lib/actions/package", () => {
         "src/one/dep.json"
       ]);
     });
-
-    it("combines options for ignoring"); // TODO(EXT)
   });
 
   describe("ignores", () => {
