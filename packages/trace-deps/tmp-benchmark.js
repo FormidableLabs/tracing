@@ -1,6 +1,6 @@
 "use strict";
 
-// TODO: REMOVE + REMOVE DEPS
+// TODO(EXT): REMOVE + REMOVE DEPS
 const path = require("path");
 const Benchmark = require("benchmark");
 const { log } = console;
@@ -19,8 +19,15 @@ Object.entries(IMPLS)
   // add tests
   .reduce((suite, [name, fn]) => suite.add(name, () => {
     fn("hi.jpg");
-    fn("ho/hi.node");
-    fn("blah/code.js.map");
+    // fn("hi/ho/fum.js");
+    // fn("hi/ho/no-extension");
+    // fn("ho/hi.node");
+    // fn("blah/code.js.map");
+    // fn("hi.jpg");
+    // fn("hi/ho/fum.js");
+    // fn("hi/ho/no-extension");
+    // fn("ho/hi.node");
+    // fn("blah/code.js.map");
   }), new Benchmark.Suite())
   // add listeners
   .on("cycle", (event) => {
