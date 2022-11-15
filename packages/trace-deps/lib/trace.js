@@ -514,8 +514,8 @@ const _resolveDep = async ({
  * @param {boolean}       opts.bailOnMissing      allow static dependencies to be missing
  * @param {boolean}       opts.includeSourceMaps  include source map paths in output
  * @param {Object}        opts.extraImports       map files to additional imports to trace
- * @param {Array<string>} opts._ignoreExtensions  (internal) extensions set
- * @param {Object}        opts._extraImports      (internal) normalized map
+ * @param {Array<string>} opts._ignoreExtensions  (internal) ignored extensions
+ * @param {Object}        opts._extraImports      (internal) normalized imports
  * @param {Set}           opts._tracedDepPaths    (internal) tracked dependencies
  * @returns {Promise<Object>}                     dependencies and other information
  */
@@ -696,8 +696,8 @@ const traceFile = async ({
  * @param {boolean}       opts.bailOnMissing      allow static dependencies to be missing
  * @param {boolean}       opts.includeSourceMaps  include source map paths in output
  * @param {Object}        opts.extraImports       map files to additional imports to trace
- * @param {Array<string>} opts._ignoreExtensions  (internal) extensions set
- * @param {Object}        opts._extraImports      (internal) normalized map
+ * @param {Array<string>} opts._ignoreExtensions  (internal) ignored extensions
+ * @param {Object}        opts._extraImports      (internal) normalized imports
  * @param {Set}           opts._tracedDepPaths    (internal) tracked dependencies
  * @returns {Promise<Object>}                     dependencies and other information
  */
