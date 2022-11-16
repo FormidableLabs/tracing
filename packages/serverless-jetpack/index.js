@@ -197,7 +197,30 @@ class Jetpack {
     }, {});
     const layers = "TODO LAYERS";
 
-    this.__config = { service, functions, layers };
+    const functionsToPackage = Object.entries(functions).reduce((memo, [name, cfg]) => {
+      // Individually packaged.
+      if (!(service.package.individually || cfg.individually)) { return memo; }
+      // Is Node.js
+      if (cfg.isNode === true || cfg.isNode !== false && service.isNode === true) { return memo; }
+      // Not disabled or artifact provided.
+      if (cfg.disable || cfg.artifact) { return memo; }
+
+      // Let's package the function!
+      memo[name] = {
+        msg: "TODO: PACKAGE FUNCTION / ADD NEEDED INFO"
+      };
+
+      return memo;
+    }, {});
+
+    this.__config = {
+      config: { service, functions, layers },
+      "package": {
+        service: "TODO",
+        functions: functionsToPackage
+      },
+      layers: "TODO"
+    };
   }
 
   // Lazy getter
