@@ -57,7 +57,10 @@ importers:
     specifiers: {}
 
   packages/serverless-jetpack:
-    specifiers: {}
+    specifiers:
+      trace-pkg: ^0.5.1
+    dependencies:
+      trace-pkg: link:../trace-pkg
 
   packages/trace-deps:
     specifiers:

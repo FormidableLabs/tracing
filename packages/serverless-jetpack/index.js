@@ -1,5 +1,10 @@
 "use strict";
 
+const path = require("path");
+const { bundle } = require("trace-pkg/lib/worker/bundle");
+
+const SLS_TMP_DIR = ".serverless";
+
 class Jetpack {
   constructor(serverless, options) {
     this.serverless = serverless;
@@ -224,8 +229,7 @@ class Jetpack {
         service: serviceToPackage,
         functions: functionsToPackage,
         layers: layersToPackage
-      },
-      layers: "TODO"
+      }
     };
   }
 
@@ -242,15 +246,21 @@ class Jetpack {
   // Methods.
   // ==============================================================================================
   async package() {
-    // TODO(jetpack): Remove
-    const INDENT = 2;
-    // eslint-disable-next-line no-console
-    console.log("TODO(jetpack): package method called", JSON.stringify({
-      config: this._config
-    }, null, INDENT));
+    const { "package": { service, functions } } = this._config;
+    // Service
+    if (Object.entries(service).length) {
+      const serviceName = this.serverless.service.service;
+      const bundleName = path.join(SLS_TMP_DIR, `${serviceName}.zip`);
+      console.log("TODO PACKAGE SERVICE", { bundleName, service });
+    }
 
-    // TODO: HERE GLOBAL
-    // console.log("TODO SERVICE", this.serverless.service)
+    // Functions
+    if (Object.entries(functions).length) {
+      Object.entries(functions).forEach(([functionName, cfg]) => {
+        const bundleName = path.join(SLS_TMP_DIR, `${functionName}.zip`);
+        console.log("TODO PACKAGE FN", { bundleName, cfg });
+      });
+    }
   }
 }
 

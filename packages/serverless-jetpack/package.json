@@ -19,7 +19,9 @@
     "npm",
     "yarn"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "trace-pkg": "^0.5.1"
+  },
   "devDependencies": {},
   "scripts": {
     "lint": "pnpm exec eslint .",
