@@ -133,14 +133,14 @@ const createZip = async ({ cwd, outputPath, fileObjs }) => {
 const bundle = async ({
   cwd,
   output,
-  trace,
-  include,
+  trace = [],
+  include = [],
   traceOptions: {
     includeSourceMaps = false,
     ignores = [],
     conditions = [],
     allowMissing = {},
-    dynamic: { resolutions = {} }
+    dynamic: { resolutions = {} } = {}
   } = {},
   dryRun
 }) => {

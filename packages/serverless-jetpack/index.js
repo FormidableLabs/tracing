@@ -1,9 +1,15 @@
 "use strict";
 
 const path = require("path");
+const { glob } = require("trace-pkg/lib/config");
 const { bundle } = require("trace-pkg/lib/worker/bundle");
 
+const PLUGIN_NAME = require("./package.json").name;
 const SLS_TMP_DIR = ".serverless";
+
+// Helpers
+// eslint-disable-next-line no-magic-numbers
+const toSecs = (time) => (time / 1000).toFixed(2);
 
 class Jetpack {
   constructor(serverless, options) {
@@ -210,15 +216,19 @@ class Jetpack {
       if (cfg.isNode === false || cfg.isNode === null && service.isNode !== true) { return; }
       if (cfg.package.disable || cfg.package.artifact) { return; }
 
+      // Packaging information.
+      const fn = svc.getFunction(name);
+      // We extract handler file name pretty analogously to how serverless does it.
+      const handler = `${fn.handler.replace(/\.[^\.]+$/, "")}{,.*js}`;
+      const pkgObj = {
+        handler
+      };
+
       // Determine if part of service or individual function packages.
       if (service.package.individually || cfg.package.individually) {
-        functionsToPackage[name] = {
-          msg: "TODO: PACKAGE INDIVIDUAL FUNCTION / ADD NEEDED INFO"
-        };
+        functionsToPackage[name] = pkgObj;
       } else {
-        serviceToPackage[name] = {
-          msg: "TODO: PACKAGE SERVICE FUNCTION / ADD NEEDED INFO"
-        };
+        serviceToPackage[name] = pkgObj;
       }
     });
     const layersToPackage = "TODO LAYERS";
@@ -242,24 +252,75 @@ class Jetpack {
     return this.__config;
   }
 
+
+  // ==============================================================================================
+  // Logging.
+  // ==============================================================================================
+  _log(msg, opts) {
+    const { cli } = this.serverless;
+    cli.log(`[${PLUGIN_NAME}] ${msg}`, null, opts);
+  }
+
+  _logDebug(msg) {
+    if (process.env.SLS_DEBUG) {
+      this._log(msg);
+    }
+  }
+
+  _logWarning(msg) {
+    const { cli } = this.serverless;
+    cli.log(`[${PLUGIN_NAME}] WARNING: ${msg}`, null, { color: "red" });
+  }
+
   // ==============================================================================================
   // Methods.
   // ==============================================================================================
   async package() {
     const { "package": { service, functions } } = this._config;
+    const cwd = process.cwd(); // TODO: Figure this out more.
+    const svc = this.serverless.service;
+
     // Service
     if (Object.entries(service).length) {
-      const serviceName = this.serverless.service.service;
-      const bundleName = path.join(SLS_TMP_DIR, `${serviceName}.zip`);
-      console.log("TODO PACKAGE SERVICE", { bundleName, service });
+      const start = new Date();
+      const output = path.join(SLS_TMP_DIR, `${svc.service}.zip`);
+
+      // Infer files, set state
+      const patterns = [];
+      Object.values(service).forEach((cfg) => {
+        patterns.push(cfg.handler);
+      });
+      const include = await glob(patterns);
+
+      // Bundle
+      await bundle({ cwd, output, include });
+
+      // Mark artifact
+      svc.package = svc.package || {};
+      svc.package.artifact = output;
+
+      this._log(`Packaged service: ${output} (${toSecs(new Date() - start)}s)`);
     }
 
     // Functions
     if (Object.entries(functions).length) {
-      Object.entries(functions).forEach(([functionName, cfg]) => {
-        const bundleName = path.join(SLS_TMP_DIR, `${functionName}.zip`);
-        console.log("TODO PACKAGE FN", { bundleName, cfg });
-      });
+      await Promise.all(Object.entries(functions).map(async ([functionName, cfg]) => {
+        const start = new Date();
+        const output = path.join(SLS_TMP_DIR, `${functionName}.zip`);
+        const include = await glob([
+          cfg.handler
+        ]);
+
+        // Bundle
+        await bundle({ cwd, output, include });
+
+        // Mark artifact
+        const fn = svc.getFunction(functionName);
+        fn.package = fn.package || {};
+        fn.package.artifact = output;
+
+        this._log(`Packaged function: ${output} (${toSecs(new Date() - start)}s)`);
+      }));
     }
   }
 }
