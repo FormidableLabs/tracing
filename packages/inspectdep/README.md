@@ -10,8 +10,6 @@ An inspection tool for dependencies in `node_modules`.
 
 ### `findProdInstalls({ rootPath })`
 
-<!-- TODO(ID): Match trace-deps README format -->
-
 Find on-disk locations of all production dependencies in `node_modules`.
 
 _Notes_:

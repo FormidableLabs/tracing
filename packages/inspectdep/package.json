@@ -3,7 +3,8 @@
   "version": "0.2.0",
   "description": "A dependency inspection tool.",
   "main": "index.js",
-  "repository": "https://github.com/FormidableLabs/inspectdep",
+  "repository": "https://github.com/FormidableLabs/tracing",
+  "homepage": "https://github.com/FormidableLabs/tracing/tree/main/packages/inspectdep#readme",
   "author": "Ryan Roemer <ryan.roemer@formidable.com>",
   "license": "MIT",
   "keywords": [
