@@ -280,6 +280,9 @@ class Jetpack {
     const cwd = process.cwd(); // TODO: Figure this out more.
     const svc = this.serverless.service;
 
+    // TODO(JETPACK): Actually abstract out service + function + layer packaging.
+    // TODO(JETPACK): Handle `patterns` services + function + layer options.
+
     // Service
     if (Object.entries(service).length) {
       const start = new Date();
