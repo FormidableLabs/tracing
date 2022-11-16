@@ -2,8 +2,8 @@
 
 class Jetpack {
   constructor(serverless, options) {
-    // TODO(jetpack): Confirm both of these are used.
     this.serverless = serverless;
+    // TODO(jetpack): Confirm both of this is used.
     this.options = options;
 
     // Initialize internal state.
@@ -12,55 +12,9 @@ class Jetpack {
     this.hooks = this._getHooks({ hooks: serverless.pluginManager.hooks });
   }
 
+  // ==============================================================================================
   // Constructor helpers.
-  _setConfigSchema({ handler }) {
-    // We're presently keeping just `custom` and `function` configuration properties
-    // as that's what existing Jetpack has. Here's a snippet of how to add a top-level
-    // property for later:
-    //
-    // ```js
-    // // Define the top level property.
-    // const configName = this.constructor.name.toLocaleLowerCase();
-    // handler.defineTopLevelProperty(configName, {
-    //   type: "object",
-    //   properties: {
-    //     global: { type: "string" }
-    //   }
-    // });
-    // // Accessible within lifecycle via:
-    // this.serverless.configurationInput.jetpack
-    // ```
-
-    // Custom.
-    handler.defineCustomProperties({
-      type: "object",
-      properties: {
-        jetpack: {
-          type: "object",
-          properties: {
-            custom: { type: "string" }
-          }
-        }
-      }
-    });
-
-    // Function.
-    const providerName = this.serverless.service.provider.name;
-    handler.defineFunctionProperties(providerName, {
-      type: "object",
-      properties: {
-        jetpack: {
-          type: "object",
-          properties: {
-            "function": { type: "string" }
-          }
-        }
-      }
-    });
-
-    // TODO(jetpack): Also config for layers.
-  }
-
+  // ==============================================================================================
   _getCommands() {
     return {
       jetpack: {
@@ -152,7 +106,61 @@ class Jetpack {
     };
   }
 
+  // ==============================================================================================
+  // Config.
+  // ==============================================================================================
+  _setConfigSchema({ handler }) {
+    // We're presently keeping just `custom` and `function` configuration properties
+    // as that's what existing Jetpack has. Here's a snippet of how to add a top-level
+    // property for later:
+    //
+    // ```js
+    // // Define the top level property.
+    // const configName = this.constructor.name.toLocaleLowerCase();
+    // handler.defineTopLevelProperty(configName, {
+    //   type: "object",
+    //   properties: {
+    //     global: { type: "string" }
+    //   }
+    // });
+    // // Accessible within lifecycle via:
+    // this.serverless.configurationInput.jetpack
+    // ```
+
+    // Custom.
+    handler.defineCustomProperties({
+      type: "object",
+      properties: {
+        jetpack: {
+          type: "object",
+          properties: {
+            custom: { type: "string" } // TODO(jetpack): Implement real props.
+          }
+        }
+      }
+    });
+
+    // Function.
+    const providerName = this.serverless.service.provider.name;
+    handler.defineFunctionProperties(providerName, {
+      type: "object",
+      properties: {
+        jetpack: {
+          type: "object",
+          properties: {
+            "function": { type: "string" } // TODO(jetpack): Implement real props.
+          }
+        }
+      }
+    });
+
+    // TODO(jetpack): Also config for layers.
+  }
+
   // Get resolved config values.
+  //
+  // **Notable values**:
+  // - `isNode`: If `true` then Node, if `false` then not Node, if `null` then unset.
   //
   // **Note**: Only use in lifecycle events.
   //
@@ -161,13 +169,35 @@ class Jetpack {
   // > Do not try to read configuration in the plugin constructor, as variables aren't resolved yet.
   // > Read configuration in lifecycle events only.
   _setConfig() {
-    this.__config = {
-      custom: this.serverless.service.custom.jetpack || {},
-      functions: Object.entries(this.serverless.service.functions).reduce((memo, [name, cfg]) => {
-        memo[name] = cfg.jetpack || {};
-        return memo;
-      }, {})
+    // Shortcuts.
+    const svc = this.serverless.service;
+
+    // Config.
+    const service = {
+      "package": {
+        individually: !!svc.package.individually
+      },
+      isNode: svc.provider.runtime ? svc.provider.runtime.startsWith("node") : null,
+      jetpack: svc.custom.jetpack || {}
     };
+    const functions = Object.entries(svc.functions).reduce((memo, [name, cfg]) => {
+      const fn = svc.getFunction(name);
+      const fnPkg = fn.package || {};
+      memo[name] = {
+        "package": {
+          disable: !!fnPkg.disable,
+          individually: !!fnPkg.individually,
+          artifact: fnPkg.artifact || null
+        },
+        isNode: fn.runtime ? fn.runtime.startsWith("node") : null,
+        jetpack: cfg.jetpack || {}
+      };
+
+      return memo;
+    }, {});
+    const layers = "TODO LAYERS";
+
+    this.__config = { service, functions, layers };
   }
 
   // Lazy getter
@@ -179,6 +209,9 @@ class Jetpack {
     return this.__config;
   }
 
+  // ==============================================================================================
+  // Methods.
+  // ==============================================================================================
   async package() {
     // TODO(jetpack): Remove
     const INDENT = 2;
