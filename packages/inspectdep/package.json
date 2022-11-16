@@ -1,0 +1,25 @@
+{
+  "name": "inspectdep",
+  "version": "0.2.0",
+  "description": "A dependency inspection tool.",
+  "main": "index.js",
+  "repository": "https://github.com/FormidableLabs/tracing",
+  "homepage": "https://github.com/FormidableLabs/tracing/tree/main/packages/inspectdep#readme",
+  "author": "Ryan Roemer <ryan.roemer@formidable.com>",
+  "license": "MIT",
+  "keywords": [
+    "dependencies",
+    "devDependencies",
+    "node_modules",
+    "npm",
+    "yarn"
+  ],
+  "scripts": {
+    "lint": "pnpm exec eslint .",
+    "test": "pnpm exec mocha -r ./test/setup.js \"**/*.spec.js\"",
+    "test:cov": "pnpm exec nyc mocha -r ./test/setup.js \"**/*.spec.js\"",
+    "check": "pnpm run lint && pnpm run test",
+    "check:ci": "pnpm run lint && pnpm run test:cov",
+    "codecov": "pnpm exec codecov -p \"../..\""
+  }
+}
