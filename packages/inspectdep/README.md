@@ -30,6 +30,7 @@ _Returns_:
 
 [npm_img]: https://badge.fury.io/js/inspectdep.svg
 [npm_site]: http://badge.fury.io/js/inspectdep
+[maintenance-image]: https://img.shields.io/badge/maintenance-active-green.svg?color=brightgreen&style=flat
 
 ## Maintenance Status
 
