@@ -172,7 +172,7 @@ class Jetpack {
     // Shortcuts.
     const svc = this.serverless.service;
 
-    // Config.
+    // Actual config.
     const service = {
       "package": {
         individually: !!svc.package.individually
@@ -197,27 +197,33 @@ class Jetpack {
     }, {});
     const layers = "TODO LAYERS";
 
-    const functionsToPackage = Object.entries(functions).reduce((memo, [name, cfg]) => {
-      // Individually packaged.
-      if (!(service.package.individually || cfg.individually)) { return memo; }
-      // Is Node.js
-      if (cfg.isNode === true || cfg.isNode !== false && service.isNode === true) { return memo; }
-      // Not disabled or artifact provided.
-      if (cfg.disable || cfg.artifact) { return memo; }
+    // Things we actually want to package
+    const serviceToPackage = {};
+    const functionsToPackage = {};
+    Object.entries(functions).forEach(([name, cfg]) => {
+      // Only consider Node.js fns that actually need packaging.
+      if (cfg.isNode === false || cfg.isNode === null && service.isNode !== true) { return; }
+      if (cfg.package.disable || cfg.package.artifact) { return; }
 
-      // Let's package the function!
-      memo[name] = {
-        msg: "TODO: PACKAGE FUNCTION / ADD NEEDED INFO"
-      };
-
-      return memo;
-    }, {});
+      // Determine if part of service or individual function packages.
+      if (service.package.individually || cfg.package.individually) {
+        functionsToPackage[name] = {
+          msg: "TODO: PACKAGE INDIVIDUAL FUNCTION / ADD NEEDED INFO"
+        };
+      } else {
+        serviceToPackage[name] = {
+          msg: "TODO: PACKAGE SERVICE FUNCTION / ADD NEEDED INFO"
+        };
+      }
+    });
+    const layersToPackage = "TODO LAYERS";
 
     this.__config = {
       config: { service, functions, layers },
       "package": {
-        service: "TODO",
-        functions: functionsToPackage
+        service: serviceToPackage,
+        functions: functionsToPackage,
+        layers: layersToPackage
       },
       layers: "TODO"
     };
