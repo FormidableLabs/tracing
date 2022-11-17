@@ -20,6 +20,7 @@
     "yarn"
   ],
   "dependencies": {
+    "inspectdep": "^0.2.0",
     "trace-pkg": "^0.5.1"
   },
   "devDependencies": {},

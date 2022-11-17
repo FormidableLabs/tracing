@@ -58,8 +58,10 @@ importers:
 
   packages/serverless-jetpack:
     specifiers:
+      inspectdep: ^0.2.0
       trace-pkg: ^0.5.1
     dependencies:
+      inspectdep: link:../inspectdep
       trace-pkg: link:../trace-pkg
 
   packages/trace-deps:

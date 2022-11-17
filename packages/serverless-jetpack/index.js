@@ -1,6 +1,7 @@
 "use strict";
 
 const path = require("path");
+const { findProdInstalls } = require("inspectdep");
 const { glob } = require("trace-pkg/lib/config");
 const { bundle } = require("trace-pkg/lib/worker/bundle");
 
@@ -11,6 +12,33 @@ const SLS_TMP_DIR = ".serverless";
 // eslint-disable-next-line no-magic-numbers
 const toSecs = (time) => (time / 1000).toFixed(2);
 
+const isBin = (dep) => dep.indexOf(path.join("node_modules", ".bin")) > -1;
+
+const getProdPatterns = async () => {
+  // TODO(JETPACK): Do all real root finding, etc.
+  const cwd = process.cwd();
+  const rootPath = cwd;
+  const prodInstalls = await findProdInstalls({ rootPath, curPath: cwd });
+
+  return prodInstalls
+    // Relativize to root path for inspectdep results, the cwd for glob.
+    .map((dep) => path.relative(cwd, path.join(rootPath, dep)))
+    // Sort for proper glob order.
+    .sort()
+    // 1. Convert to `PATH/**` glob.
+    // 2. Add excludes for node_modules in every discovered pattern dep
+    //    dir. This allows us to exclude devDependencies because
+    //    **later** include patterns should have all the production deps
+    //    already and override.
+    .map((dep) => isBin(dep)
+      ? [dep] // **don't** glob bin path (`ENOTDIR: not a directory`)
+      : [path.join(dep, "**"), `!${path.join(dep, "node_modules", "**")}`]
+    )
+    // Flatten the temp arrays we just introduced.
+    .reduce((m, a) => m.concat(a), []);
+};
+
+// Plugin
 class Jetpack {
   constructor(serverless, options) {
     this.serverless = serverless;
@@ -234,6 +262,7 @@ class Jetpack {
     const layersToPackage = "TODO LAYERS";
 
     this.__config = {
+      // TODO: Do we need to pass this on?
       config: { service, functions, layers },
       "package": {
         service: serviceToPackage,
@@ -289,10 +318,13 @@ class Jetpack {
       const output = path.join(SLS_TMP_DIR, `${svc.service}.zip`);
 
       // Infer files, set state
-      const patterns = [];
+      let patterns = [];
       Object.values(service).forEach((cfg) => {
         patterns.push(cfg.handler);
       });
+
+      const prodPatterns = await getProdPatterns();
+      patterns = patterns.concat(prodPatterns);
       const include = await glob(patterns);
 
       // Bundle
@@ -310,9 +342,12 @@ class Jetpack {
       await Promise.all(Object.entries(functions).map(async ([functionName, cfg]) => {
         const start = new Date();
         const output = path.join(SLS_TMP_DIR, `${functionName}.zip`);
-        const include = await glob([
-          cfg.handler
-        ]);
+
+        const prodPatterns = await getProdPatterns();
+        const include = await glob([].concat(
+          cfg.handler,
+          prodPatterns
+        ));
 
         // Bundle
         await bundle({ cwd, output, include });
