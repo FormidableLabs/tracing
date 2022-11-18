@@ -137,6 +137,7 @@ const bundle = async ({
   include = [],
   traceOptions: {
     includeSourceMaps = false,
+    ignoreExtensions = [],
     ignores = [],
     conditions = [],
     allowMissing = {},
@@ -149,6 +150,7 @@ const bundle = async ({
   const { dependencies, sourceMaps, misses } = await traceFiles({
     srcPaths: tracePaths,
     includeSourceMaps,
+    ignoreExtensions,
     ignores,
     conditions,
     allowMissing,
