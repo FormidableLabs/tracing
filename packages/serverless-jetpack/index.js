@@ -39,7 +39,6 @@ const getProdPatterns = async () => {
 class Jetpack {
   constructor(serverless, options) {
     this.serverless = serverless;
-    // TODO(jetpack): Confirm both of this is used.
     this.options = options;
 
     // Initialize internal state.
@@ -77,7 +76,7 @@ class Jetpack {
                 shortcut: "f",
                 type: "string"
               },
-              // TODO(jetpack): Implement report option
+              // TODO(jetpack): Document report option. (Implemented!)
               report: {
                 usage: "Generate full bundle report",
                 shortcut: "r",
@@ -315,6 +314,8 @@ class Jetpack {
     const { "package": { service, functions } } = this._config;
     const cwd = process.cwd(); // TODO: Figure this out more.
     const svc = this.serverless.service;
+    const options = this.options || {};
+    const report = !!options.report;
 
     // TODO(JETPACK): Remove handler from the code (?)
     // TODO(JETPACK): Figure out default SLS includes and if we still want to do this (???)
@@ -366,8 +367,9 @@ class Jetpack {
     // Layers TODO
 
     // Excute all packaging.
-    const results = await createPackage({
+    await createPackage({
       opts: {
+        report,
         config: {
           packages
         }
