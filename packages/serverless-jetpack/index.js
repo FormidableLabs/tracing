@@ -2,16 +2,12 @@
 
 const path = require("path");
 const { findProdInstalls } = require("inspectdep");
-const { glob } = require("trace-pkg/lib/config");
-const { bundle } = require("trace-pkg/lib/worker/bundle");
+const { "package": createPackage } = require("trace-pkg/lib/actions/package");
 
 const PLUGIN_NAME = require("./package.json").name;
 const SLS_TMP_DIR = ".serverless";
 
 // Helpers
-// eslint-disable-next-line no-magic-numbers
-const toSecs = (time) => (time / 1000).toFixed(2);
-
 const isBin = (dep) => dep.indexOf(path.join("node_modules", ".bin")) > -1;
 
 const getProdPatterns = async () => {
@@ -309,57 +305,61 @@ class Jetpack {
     const cwd = process.cwd(); // TODO: Figure this out more.
     const svc = this.serverless.service;
 
-    // TODO(JETPACK): Actually abstract out service + function + layer packaging.
-    // TODO(JETPACK): Handle `patterns` services + function + layer options.
+    // Create trace-pkg configuration for packaging.
+    const packages = {};
 
     // Service
     if (Object.entries(service).length) {
-      const start = new Date();
       const output = path.join(SLS_TMP_DIR, `${svc.service}.zip`);
 
-      // Infer files, set state
-      let patterns = [];
-      Object.values(service).forEach((cfg) => {
-        patterns.push(cfg.handler);
-      });
-
-      const prodPatterns = await getProdPatterns();
-      patterns = patterns.concat(prodPatterns);
-      const include = await glob(patterns);
-
-      // Bundle
-      await bundle({ cwd, output, include });
+      // Add to config.
+      packages[svc.service] = {
+        cwd,
+        output,
+        include: [].concat(
+          Object.values(service).map((cfg) => cfg.handler),
+          await getProdPatterns()
+        )
+      };
 
       // Mark artifact
       svc.package = svc.package || {};
       svc.package.artifact = output;
-
-      this._log(`Packaged service: ${output} (${toSecs(new Date() - start)}s)`);
     }
 
     // Functions
     if (Object.entries(functions).length) {
       await Promise.all(Object.entries(functions).map(async ([functionName, cfg]) => {
-        const start = new Date();
         const output = path.join(SLS_TMP_DIR, `${functionName}.zip`);
 
-        const prodPatterns = await getProdPatterns();
-        const include = await glob([].concat(
-          cfg.handler,
-          prodPatterns
-        ));
-
-        // Bundle
-        await bundle({ cwd, output, include });
+        // Add to config.
+        packages[functionName] = {
+          cwd,
+          output,
+          include: [].concat(
+            cfg.handler,
+            await getProdPatterns()
+          )
+        };
 
         // Mark artifact
         const fn = svc.getFunction(functionName);
         fn.package = fn.package || {};
         fn.package.artifact = output;
-
-        this._log(`Packaged function: ${output} (${toSecs(new Date() - start)}s)`);
       }));
     }
+
+    // Layers TODO
+
+    // Excute all packaging.
+    // TODO(JETPACK): Make trace-pkg log in jetpack format with jetpack logger.
+    await createPackage({
+      opts: {
+        config: {
+          packages
+        }
+      }
+    });
   }
 }
 

@@ -99,6 +99,5 @@ const parseConfig = async ({
 };
 
 module.exports = {
-  parseConfig,
-  glob
+  parseConfig
 };
