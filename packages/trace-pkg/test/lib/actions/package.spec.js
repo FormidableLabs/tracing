@@ -433,6 +433,122 @@ describe("lib/actions/package", () => {
     });
   });
 
+  describe("ignoreExtensions", () => {
+    it("ignores default ignored extensions", async () => {
+      mock({
+        src: {
+          "one.js": "module.exports = require('./one/dep');",
+          one: {
+            "dep.js": `
+              const node = require("./dep.node");
+              const json = require("./dep.json");
+
+              module.exports = "dep";
+            `,
+            "dep.node": "\\explode NODE",
+            "dep.json": JSON.stringify({ dep: "json " })
+          }
+        }
+      });
+
+      await createPackage({
+        opts: {
+          config: {
+            packages: {
+              "one.zip": {
+                trace: [
+                  "src/one.js"
+                ]
+              }
+            }
+          }
+        }
+      });
+
+      expect(logStub).to.have.been.calledWithMatch("Created 1 packages:");
+
+      expect(await globby("*.zip")).to.eql([
+        "one.zip"
+      ]);
+      expect(zipContents("one.zip")).to.eql([
+        "src/one.js",
+        "src/one/dep.js",
+        "src/one/dep.json",
+        "src/one/dep.node"
+      ]);
+    });
+
+    it("ignores custom extensions", async () => {
+      mock({
+        src: {
+          "one.js": "module.exports = require('./one/dep');",
+          one: {
+            "dep.js": `
+              const node = require("./dep.json");
+              const json = require("./dep.js.map");
+              const pkg = require("pkg");
+
+              module.exports = "dep";
+            `,
+            "dep.js.map": "\\explode SOURCEMAP",
+            "dep.json": JSON.stringify({ dep: "json " })
+          }
+        },
+        node_modules: {
+          pkg: {
+            "package.json": JSON.stringify({
+              main: "index.js"
+            }),
+            "index.js": `
+              require("./native.node");
+              require("./data.graphql");
+
+              module.exports = {
+                one: () => "one"
+              };
+            `,
+            "data.graphql": "\\explode GRAPHQL",
+            "native.node": "\\explode NODE"
+          }
+        }
+      });
+
+      await createPackage({
+        opts: {
+          config: {
+            options: {
+              ignoreExtensions: [".graphql"]
+            },
+            packages: {
+              "one.zip": {
+                trace: [
+                  "src/one.js"
+                ],
+                ignoreExtensions: [".js.map"]
+              }
+            }
+          }
+        }
+      });
+
+      expect(logStub).to.have.been.calledWithMatch("Created 1 packages:");
+
+      expect(await globby("*.zip")).to.eql([
+        "one.zip"
+      ]);
+      expect(zipContents("one.zip")).to.eql([
+        "node_modules/pkg/data.graphql",
+        "node_modules/pkg/index.js",
+        "node_modules/pkg/native.node",
+        "node_modules/pkg/package.json",
+        "src/one.js",
+        "src/one/dep.js",
+        "src/one/dep.js.map",
+        "src/one/dep.json"
+      ]);
+    });
+  });
+
   describe("ignores", () => {
     it("ignores missing packages", async () => {
       mock({

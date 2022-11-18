@@ -69,6 +69,7 @@ Configuration options are generally global (`options.<OPTION_NAME>`) and/or per-
 - `options.concurrency` (`Number`): The number of independent package tasks to run off the main execution thread. If `1`, then run tasks serially in main thread. If `2+` run off main thread with `concurrency` number of workers. If `0`, then use "number of CPUs" value. (default: `1`).
     - Can be overridden from CLI with `--concurrency <NUMBER>`
 - `options.includeSourceMaps` (`Boolean`): Include source map paths from files that are found during tracing (not inclusion via `include`) and present on-disk. Source map paths inferred but not found are ignored. (default: `false`). Please see [discussion below](#including-source-maps) to evaluate whether or not you should use this feature.
+- `options.ignoreExtensions` (`Array<string>`): A set of file extensions (e.g., `.map` or `.graphql`) to skip tracing on.  These files will still be included in the bundle. This is useful when you use libraries that extend Node.js' built in `import`/`require` functionality to be import non-JavaScript libraries that aren't parseable by this library. These are added to our built-in extensions to skip of `.json` and `.node`.
 - `options.ignores` (`Array<string>`): A set of package path prefixes up to a directory level (e.g., `react` or `mod/lib`) to skip tracing on. This is particularly useful when you are excluding a package like `aws-sdk` that is already provided for your lambda.
 - `options.conditions` (`Array<string>`): list of Node.js runtime import [user conditions](https://nodejs.org/api/packages.html#resolving-user-conditions) to trace in addition to our default built-in Node.js conditions of `import`, `require`, `node`, and `default`.
 - `options.allowMissing` (`Object.<string, Array<string>>`): A way to allow certain packages to have potentially failing dependencies. Specify each object key as either (1) an source file path relative to `cwd` that begins with a `./` or (2) a package name and provide a value as an array of dependencies that _might_ be missing on disk. If the sub-dependency is found, then it is included in the bundle (this part distinguishes this option from `ignores`). If not, it is skipped without error.
@@ -88,6 +89,7 @@ Configuration options are generally global (`options.<OPTION_NAME>`) and/or per-
 - `packages.<PKG_NAME>.include` (`Array<string>`): A list of glob patterns to include/exclude in the package per [fast-glob][] globbing rules. Matched files are **not** traced for further dependencies are suitable for any file type that should end up in the bundle. Use this option for files that won't automatically be traced into your bundle.
 - `packages.<PKG_NAME>.trace` (`Array<string>`): A list of [fast-glob][] glob patterns to match JS files that will be further traced to infer all imported dependencies via static analysis. Use this option to include your source code files that comprises your application.
 - `packages.<PKG_NAME>.includeSourceMaps` (`Boolean`): Additional configuration to override value of `options.includeSourceMaps`.
+- `packages.<PKG_NAME>.ignoreExtensions` (`Array<string>`): Additional configuration to merge with `options.ignoreExtensions`.
 - `packages.<PKG_NAME>.ignores` (`Array<string>`): Additional configuration to merge with `options.ignores`.
 - `packages.<PKG_NAME>.conditions` (`Array<string>`): Additional configuration to merge with `options.conditions`.
 - `packages.<PKG_NAME>.allowMissing` (`Object.<string, Array<string>>`): Additional configuration to merge with `options.allowMissing`. Note that for source file paths, all of the paths are resolved to `cwd`, so if you provide both a global and package-level `cwd` the relative paths probably won't resolve as you would expect them to.
@@ -117,6 +119,10 @@ options:
 
   # Include reference source maps from traced files? (default: `false`)
   includeSourceMaps: true (or) false
+
+  # Extensions to skip tracing on.
+  ignoreExtensions:
+    - .<EXT_NAME>
 
   # Package path prefixes up to a directory level to skip tracing on.
   ignores:
@@ -187,6 +193,7 @@ packages:
 
     # Extensions of `options.*` fields below...
     includeSourceMaps: false
+    ignoreExtensions: []
     ignores: []
     allowMissing: {}
     collapsed:
@@ -203,6 +210,9 @@ packages:
       - src/config/**/*.js    # Trace all JS files in `src/config`
 
     includeSourceMaps: true   # Include referenced source maps found on disk for traced files
+
+    ignoreExtensions:
+      - .graphql              # Don't trace e.g. `require("file.graphql")`
 
     include:
       - assets/**/*.css       # Include all CSS files in `assets`

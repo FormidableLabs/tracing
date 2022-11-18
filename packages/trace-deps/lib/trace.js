@@ -19,7 +19,7 @@ const { toPosixPath } = require("./path");
 
 // File extensions that we know are or are not JavaScript (but still
 // require-able in Node.js)
-const NOT_JS_EXTS = new Set([".json", ".node"]);
+const NOT_JS_EXTS = [".json", ".node"];
 
 // Extensions to infer for resolving. Follow Node.js algorithm.
 const RESOLVE_EXTS = [".js", ".json"];
@@ -184,11 +184,13 @@ const isAllowedMiss = ({ depName, srcPath, allowMissing }) => {
 const _recurseDeps = async ({
   srcPaths,
   depPaths = [],
+  ignoreExtensions = [],
   ignores = [],
   conditions = [],
   allowMissing = {},
   bailOnMissing = true,
   includeSourceMaps = false,
+  _ignoreExtensions,
   _extraImports,
   _tracedDepPaths
 }) => {
@@ -209,17 +211,19 @@ const _recurseDeps = async ({
       _tracedDepPaths.add(depPath);
 
       // Short-circuit: Is it a known non-traceable extension?
-      if (NOT_JS_EXTS.has(path.extname(depPath))) { continue; }
+      if (_ignoreExtensions.some((ext) => depPath.endsWith(ext))) { continue; }
 
       // Recurse.
       // eslint-disable-next-line no-use-before-define
       const traced = await traceFile({
         srcPath: depPath,
+        ignoreExtensions,
         ignores,
         conditions,
         allowMissing,
         bailOnMissing,
         includeSourceMaps,
+        _ignoreExtensions,
         _extraImports,
         _tracedDepPaths
       });
@@ -503,25 +507,29 @@ const _resolveDep = async ({
  *
  * @param {*}             opts                    options object
  * @param {string}        opts.srcPath            source file path to trace
+ * @param {Array<string>} opts.ignoreExtensions   list of extensions to skip tracing on
  * @param {Array<string>} opts.ignores            list of package prefixes to ignore
  * @param {Array<string>} opts.conditions         list of additional user conditions to trace
  * @param {Object}        opts.allowMissing       map packages to list of allowed missing package
  * @param {boolean}       opts.bailOnMissing      allow static dependencies to be missing
  * @param {boolean}       opts.includeSourceMaps  include source map paths in output
  * @param {Object}        opts.extraImports       map files to additional imports to trace
- * @param {Object}        opts._extraImports      (internal) normalized map
+ * @param {Array<string>} opts._ignoreExtensions  (internal) ignored extensions
+ * @param {Object}        opts._extraImports      (internal) normalized imports
  * @param {Set}           opts._tracedDepPaths    (internal) tracked dependencies
  * @returns {Promise<Object>}                     dependencies and other information
  */
 // eslint-disable-next-line max-statements,complexity
 const traceFile = async ({
   srcPath,
+  ignoreExtensions = [],
   ignores = [],
   conditions = [],
   allowMissing = {},
   bailOnMissing = true,
   includeSourceMaps = false,
   extraImports = {},
+  _ignoreExtensions,
   _extraImports,
   _tracedDepPaths = new Set()
 } = {}) => {
@@ -530,6 +538,7 @@ const traceFile = async ({
   }
 
   // Parameters
+  _ignoreExtensions = _ignoreExtensions || NOT_JS_EXTS.concat(ignoreExtensions);
   _extraImports = _extraImports || normalizeExtraImports(extraImports);
 
   // Get source.
@@ -647,11 +656,13 @@ const traceFile = async ({
   _tracedDepPaths.add(srcPath);
   const recursed = await _recurseDeps({
     depPaths,
+    ignoreExtensions,
     ignores,
     conditions,
     allowMissing,
     bailOnMissing,
     includeSourceMaps,
+    _ignoreExtensions,
     _extraImports,
     _tracedDepPaths
   });
@@ -678,37 +689,44 @@ const traceFile = async ({
  *
  * @param {*}             opts                    options object
  * @param {Array<string>} opts.srcPaths           source file paths to trace
+ * @param {Array<string>} opts.ignoreExtensions   list of extensions to skip tracing on
  * @param {Array<string>} opts.ignores            list of package prefixes to ignore
  * @param {Array<string>} opts.conditions         list of additional user conditions to trace
  * @param {Object}        opts.allowMissing       map packages to list of allowed missing package
  * @param {boolean}       opts.bailOnMissing      allow static dependencies to be missing
  * @param {boolean}       opts.includeSourceMaps  include source map paths in output
  * @param {Object}        opts.extraImports       map files to additional imports to trace
- * @param {Object}        opts._extraImports      (internal) normalized map
+ * @param {Array<string>} opts._ignoreExtensions  (internal) ignored extensions
+ * @param {Object}        opts._extraImports      (internal) normalized imports
  * @param {Set}           opts._tracedDepPaths    (internal) tracked dependencies
  * @returns {Promise<Object>}                     dependencies and other information
  */
 const traceFiles = async ({
   srcPaths,
+  ignoreExtensions = [],
   ignores = [],
   conditions = [],
   allowMissing = {},
   bailOnMissing = true,
   includeSourceMaps = false,
   extraImports = {},
+  _ignoreExtensions,
   _extraImports,
   _tracedDepPaths = new Set()
 } = {}) => {
+  _ignoreExtensions = _ignoreExtensions || NOT_JS_EXTS.concat(ignoreExtensions);
   _extraImports = _extraImports || normalizeExtraImports(extraImports);
 
   // Recurse all source files.
   const results = await _recurseDeps({
     srcPaths,
+    ignoreExtensions,
     ignores,
     conditions,
     allowMissing,
     bailOnMissing,
     includeSourceMaps,
+    _ignoreExtensions,
     _extraImports,
     _tracedDepPaths
   });

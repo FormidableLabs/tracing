@@ -151,6 +151,213 @@ describe("lib/trace", () => {
       });
     });
 
+    describe("ignoreExtensions", () => {
+      it("skips tracing for built-in ignored extensions", async () => {
+        mock({
+          "hi.js": `
+            require("one");
+          `,
+          node_modules: {
+            one: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("./native.node");
+
+                module.exports = {
+                  one: () => "one",
+                  two: () => require("two").two
+                };
+              `,
+              "native.node": "\\ NODE"
+            },
+            two: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("./jsony.json");
+
+                module.exports = {
+                  two: () => "two"
+                };
+              `,
+              "jsony.json": JSON.stringify({ jsony: "json " })
+            }
+          }
+        });
+
+        const { dependencies, misses } = await traceFile({
+          srcPath: "hi.js"
+        });
+        expect(dependencies).to.eql(fullPaths([
+          "node_modules/one/index.js",
+          "node_modules/one/native.node",
+          "node_modules/one/package.json",
+          "node_modules/two/index.js",
+          "node_modules/two/jsony.json",
+          "node_modules/two/package.json"
+        ]));
+        expect(misses).to.eql({});
+      });
+
+      it("skips tracing for custom extensions", async () => {
+        mock({
+          "hi.js": `
+            require("one");
+            require("./hi.graphql");
+          `,
+          "hi.graphql": "\\explode GRAPHQL",
+          node_modules: {
+            one: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("./native.node");
+                require("./data.graphql");
+
+                module.exports = {
+                  one: () => "one",
+                  two: () => require("two").two
+                };
+              `,
+              "data.graphql": "\\explode GRAPHQL",
+              "native.node": "\\explode NODE"
+            },
+            two: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("./jsony.json");
+                require("./source.js.map");
+
+                module.exports = {
+                  two: () => "two"
+                };
+              `,
+              "jsony.json": JSON.stringify({ jsony: "json " }),
+              "source.js.map": "\\explode SOURCE_MAP"
+            }
+          }
+        });
+
+        const { dependencies, misses } = await traceFile({
+          srcPath: "hi.js",
+          ignoreExtensions: [".graphql", ".js.map"]
+        });
+        expect(dependencies).to.eql(fullPaths([
+          "hi.graphql",
+          "node_modules/one/data.graphql",
+          "node_modules/one/index.js",
+          "node_modules/one/native.node",
+          "node_modules/one/package.json",
+          "node_modules/two/index.js",
+          "node_modules/two/jsony.json",
+          "node_modules/two/package.json",
+          "node_modules/two/source.js.map"
+        ]));
+        expect(misses).to.eql({});
+      });
+    });
+
+    describe("ignores", () => {
+      it("ignores specified names and prefixes", async () => {
+        mock({
+          "hi.js": `
+            require("one");
+            const nope = () => import("doesnt-exist");
+            const nestedNope = () => import("doesnt-exist-nested/one/two");
+            const nestedMore = () => import("doesnt-exist-nested/one/even/more.js");
+            require.resolve("does-exist-shouldnt-import/index");
+            require("exclude-only-two-nested");
+          `,
+          node_modules: {
+            one: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("doesnt-exist");
+
+                module.exports = {
+                  one: () => "one",
+                  two: () => require("two").two
+                };
+              `
+            },
+            two: {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                module.exports = {
+                  two: () => "two"
+                };
+              `
+            },
+            "exclude-only-two-nested": {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                require("./one");
+                require("./two");
+              `,
+              "one.js": `
+                module.exports = "one";
+              `,
+              two: {
+                "index.js": `
+                  // Use full module path self-reference.
+                  require("exclude-only-two-nested/two/nested/even/further");
+                  // Relative path, and higher level too!
+                  require("./nested");
+                  require("./this/is/../a/../../big/path/still/../../within/../../nested/and/more");
+                  require("../upper-nested/something/blah-blah-blah.js");
+                `,
+                "other.js": `
+                  module.exports = "other";
+                `
+              }
+            },
+            "does-exist-shouldnt-import": {
+              "package.json": stringify({
+                main: "index.js"
+              }),
+              "index.js": `
+                module.exports = "does-exist-shouldnt-import";
+              `
+            }
+          }
+        });
+
+        const { dependencies, misses } = await traceFile({
+          srcPath: "hi.js",
+          ignores: [
+            "doesnt-exist",
+            "doesnt-exist-nested/one",
+            "does-exist-shouldnt-import",
+            "exclude-only-two-nested/two/nested",
+            "exclude-only-two-nested/upper-nested"
+          ]
+        });
+        expect(dependencies).to.eql(fullPaths([
+          "node_modules/exclude-only-two-nested/index.js",
+          "node_modules/exclude-only-two-nested/one.js",
+          "node_modules/exclude-only-two-nested/package.json",
+          "node_modules/exclude-only-two-nested/two/index.js",
+          "node_modules/one/index.js",
+          "node_modules/one/package.json",
+          "node_modules/two/index.js",
+          "node_modules/two/package.json"
+        ]));
+        expect(misses).to.eql({});
+      });
+    });
+
     describe("bailOnMissing", () => {
       it("handles nonexistent dependency with bailOnMissing=false", async () => {
         mock({
@@ -1337,99 +1544,6 @@ describe("lib/trace", () => {
           "node_modules/one/package.json",
           "node_modules/three/index.js",
           "node_modules/three/package.json",
-          "node_modules/two/index.js",
-          "node_modules/two/package.json"
-        ]));
-        expect(misses).to.eql({});
-      });
-
-      it("ignores specified names and prefixes", async () => {
-        mock({
-          "hi.js": `
-            require("one");
-            const nope = () => import("doesnt-exist");
-            const nestedNope = () => import("doesnt-exist-nested/one/two");
-            const nestedMore = () => import("doesnt-exist-nested/one/even/more.js");
-            require.resolve("does-exist-shouldnt-import/index");
-            require("exclude-only-two-nested");
-          `,
-          node_modules: {
-            one: {
-              "package.json": stringify({
-                main: "index.js"
-              }),
-              "index.js": `
-                require("doesnt-exist");
-
-                module.exports = {
-                  one: () => "one",
-                  two: () => require("two").two
-                };
-              `
-            },
-            two: {
-              "package.json": stringify({
-                main: "index.js"
-              }),
-              "index.js": `
-                module.exports = {
-                  two: () => "two"
-                };
-              `
-            },
-            "exclude-only-two-nested": {
-              "package.json": stringify({
-                main: "index.js"
-              }),
-              "index.js": `
-                require("./one");
-                require("./two");
-              `,
-              "one.js": `
-                module.exports = "one";
-              `,
-              two: {
-                "index.js": `
-                  // Use full module path self-reference.
-                  require("exclude-only-two-nested/two/nested/even/further");
-                  // Relative path, and higher level too!
-                  require("./nested");
-                  require("./this/is/../a/../../big/path/still/../../within/../../nested/and/more");
-                  require("../upper-nested/something/blah-blah-blah.js");
-                `,
-                "other.js": `
-                  module.exports = "other";
-                `
-              }
-            },
-            "does-exist-shouldnt-import": {
-              "package.json": stringify({
-                main: "index.js"
-              }),
-              "index.js": `
-                module.exports = "does-exist-shouldnt-import";
-              `
-            }
-          }
-        });
-
-        const { dependencies, misses } = await traceFile({
-          srcPath: "hi.js",
-          ignores: [
-            "doesnt-exist",
-            "doesnt-exist-nested/one",
-            "does-exist-shouldnt-import",
-            "exclude-only-two-nested/two/nested",
-            "exclude-only-two-nested/upper-nested"
-          ]
-        });
-        expect(dependencies).to.eql(fullPaths([
-          "node_modules/exclude-only-two-nested/index.js",
-          "node_modules/exclude-only-two-nested/one.js",
-          "node_modules/exclude-only-two-nested/package.json",
-          "node_modules/exclude-only-two-nested/two/index.js",
-          "node_modules/one/index.js",
-          "node_modules/one/package.json",
           "node_modules/two/index.js",
           "node_modules/two/package.json"
         ]));
