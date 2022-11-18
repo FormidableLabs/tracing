@@ -305,6 +305,9 @@ class Jetpack {
     const cwd = process.cwd(); // TODO: Figure this out more.
     const svc = this.serverless.service;
 
+    // TODO(JETPACK): Remove handler from the code (?)
+    // TODO(JETPACK): Figure out default includes of everything and if we still want to do this (???)
+
     // Create trace-pkg configuration for packaging.
     const packages = {};
 
