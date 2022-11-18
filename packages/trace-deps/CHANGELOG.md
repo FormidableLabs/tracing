@@ -1,5 +1,11 @@
 Changes
 
+## 0.5.1
+
+### Patch Changes
+
+- Add `ignoreExtensions` option to `traceFile`/`traceFiles` in `trace-deps` and `trace-pkg` options (see [#18](https://github.com/FormidableLabs/tracing/issues/18)). ([#23](https://github.com/FormidableLabs/tracing/pull/23))
+
 ## 0.5.0
 
 ### Major Changes
