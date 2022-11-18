@@ -43,11 +43,11 @@ describe("e2e/trace-pkg", () => {
         { cwd }
       );
 
-      expect(stdout).to.contain(`
+      expect(stdout.replace(/[0-9\.]+ secs/gm, "0.42 secs")).to.contain(`
         Created 3 packages:
-        - one: one.zip (1 files)
-        - two: two.zip (3 files)
-        - three: ${path.normalize("../../three.zip")} (1 files)
+        - one: one.zip (1 files, 0.42 secs)
+        - two: two.zip (3 files, 0.42 secs)
+        - three: ${path.normalize("../../three.zip")} (1 files, 0.42 secs)
       `.trim().replace(/^ {8}/gm, ""));
 
       expect(stderr).to.equal("");

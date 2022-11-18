@@ -2,6 +2,7 @@
 
 const path = require("path");
 const { findProdInstalls } = require("inspectdep");
+const { setLoggingOptions } = require("trace-pkg/lib/log");
 const { "package": createPackage } = require("trace-pkg/lib/actions/package");
 
 const PLUGIN_NAME = require("./package.json").name;
@@ -45,6 +46,15 @@ class Jetpack {
     this._setConfigSchema({ handler: serverless.configSchemaHandler });
     this.commands = this._getCommands();
     this.hooks = this._getHooks({ hooks: serverless.pluginManager.hooks });
+
+    // Override trace-pkg logging.
+    setLoggingOptions({
+      loggers: {
+        log: (...args) => this._log(...args),
+        debug: (...args) => this._logDebug(...args),
+        warning: (...args) => this._logWarning(...args)
+      }
+    });
   }
 
   // ==============================================================================================
@@ -300,6 +310,7 @@ class Jetpack {
   // ==============================================================================================
   // Methods.
   // ==============================================================================================
+  // eslint-disable-next-line max-statements
   async package() {
     const { "package": { service, functions } } = this._config;
     const cwd = process.cwd(); // TODO: Figure this out more.
@@ -355,8 +366,7 @@ class Jetpack {
     // Layers TODO
 
     // Excute all packaging.
-    // TODO(JETPACK): Make trace-pkg log in jetpack format with jetpack logger.
-    await createPackage({
+    const results = await createPackage({
       opts: {
         config: {
           packages

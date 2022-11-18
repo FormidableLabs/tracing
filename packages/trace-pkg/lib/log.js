@@ -8,6 +8,8 @@ const util = require("util");
 let _enabled = true;
 const _loggers = {
   log: (...args) => console.log(...args),
+  debug: null,
+  warn: (...args) => console.log(yellow("WARN"), ...args),
   error: (...args) => console.error(...args)
 };
 
@@ -22,6 +24,11 @@ const setLoggingOptions = ({ silent, loggers }) => {
 
 const debuglog = function (namespace) {
   let debug;
+
+  // Allow override
+  if (_loggers.debug) {
+    return _loggers.debug;
+  }
 
   return (...args) => {
     // Lazy initialize logger.

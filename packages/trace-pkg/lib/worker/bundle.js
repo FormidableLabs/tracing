@@ -145,6 +145,8 @@ const bundle = async ({
   } = {},
   dryRun
 }) => {
+  const start = new Date();
+
   // Trace.
   const tracePaths = trace.map((file) => path.resolve(cwd, file));
   const { dependencies, sourceMaps, misses } = await traceFiles({
@@ -193,7 +195,8 @@ const bundle = async ({
       cwd,
       fullPath: outputPath,
       relPath: path.relative(cwd, outputPath),
-      files
+      files,
+      elapsed: new Date() - start
     }
   };
 };

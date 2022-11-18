@@ -12,6 +12,12 @@ const { bundle } = require("../worker/bundle");
 const { summarizeCollapsed } = require("../trace/collapsed");
 
 // ----------------------------------------------------------------------------
+// Helpers: Misc
+// ----------------------------------------------------------------------------
+// eslint-disable-next-line no-magic-numbers
+const toSecs = (time) => (time / 1000).toFixed(2);
+
+// ----------------------------------------------------------------------------
 // Helpers: Collapsed
 // ----------------------------------------------------------------------------
 const LINK_COLLAPSED_MISSES = pc.gray(pc.underline(
@@ -240,6 +246,7 @@ const createRunner = ({ concurrency }) => {
 // ----------------------------------------------------------------------------
 // Action: Package
 // ----------------------------------------------------------------------------
+// eslint-disable-next-line max-statements
 const createPackage = async ({ opts: { config, concurrency, report, dryRun } = {} } = {}) => {
   const plan = await parseConfig({ config, concurrency });
   concurrency = plan.concurrency;
@@ -288,14 +295,17 @@ const createPackage = async ({ opts: { config, concurrency, report, dryRun } = {
     const prefix = dryRun ? `${pc.gray("[dry-run]")} Would create` : "Created";
     log(`${prefix} ${pc.green(Object.keys(results).length)} packages:`);
 
-    Object.entries(results).forEach(([key, { output: { relPath, files } }]) => {
-      log(`- ${pc.cyan(key)}: ${relPath} (${pc.green(files.length)} ${pc.gray("files")})`);
+    Object.entries(results).forEach(([key, { output: { relPath, files, elapsed } }]) => {
+      log(`- ${pc.cyan(key)}: ${relPath} (${pc.green(files.length)} ${pc.gray("files")}, `
+        + `${pc.yellow(toSecs(elapsed))} ${pc.gray("secs")})`);
     });
   }
 
   // Bail on unresolved dynamic misses.
   handleCollapsed({ packages: plan.packages, summary: collapsedSummary });
   handleMisses({ packages: plan.packages, results });
+
+  return results;
 };
 
 module.exports = {
