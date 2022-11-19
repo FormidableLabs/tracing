@@ -39,7 +39,7 @@ const getProdPatterns = async () => {
 class Jetpack {
   constructor(serverless, options) {
     this.serverless = serverless;
-    this.options = options;
+    this.options = options || {};
 
     // Initialize internal state.
     this._setConfigSchema({ handler: serverless.configSchemaHandler });
@@ -171,14 +171,14 @@ class Jetpack {
     // this.serverless.configurationInput.jetpack
     // ```
 
-    // Custom.
+    // Global (custom).
     handler.defineCustomProperties({
       type: "object",
       properties: {
         jetpack: {
           type: "object",
           properties: {
-            custom: { type: "string" } // TODO(jetpack): Implement real props.
+            concurrency: { type: "integer", minimum: 0 }
           }
         }
       }
@@ -215,6 +215,7 @@ class Jetpack {
   _setConfig() {
     // Shortcuts.
     const svc = this.serverless.service;
+    const cfgCustom = svc.custom.jetpack || {};
 
     // Actual config.
     const service = {
@@ -273,6 +274,10 @@ class Jetpack {
         service: serviceToPackage,
         functions: functionsToPackage,
         layers: layersToPackage
+      },
+      opts: {
+        report: this.options.report,
+        concurrency: typeof cfgCustom.concurrency === "undefined" ? 1 : cfgCustom.concurrency
       }
     };
   }
@@ -311,11 +316,9 @@ class Jetpack {
   // ==============================================================================================
   // eslint-disable-next-line max-statements
   async package() {
-    const { "package": { service, functions } } = this._config;
+    const { opts, "package": { service, functions } } = this._config;
     const cwd = process.cwd(); // TODO: Figure this out more.
     const svc = this.serverless.service;
-    const options = this.options || {};
-    const report = !!options.report;
 
     // TODO(JETPACK): Remove handler from the code (?)
     // TODO(JETPACK): Figure out default SLS includes and if we still want to do this (???)
@@ -369,7 +372,7 @@ class Jetpack {
     // Excute all packaging.
     await createPackage({
       opts: {
-        report,
+        ...opts,
         config: {
           packages
         }
