@@ -10,14 +10,13 @@ describe("lib/index", () => {
   let serverless;
 
   beforeEach(() => {
-    // TODO: There is lazy loading for @serverless/dashboard-plugin that conflicts with mock
-    //mock({});
+    mock({});
     sandbox = createSandbox();
   });
 
   afterEach(() => {
     sandbox.restore();
-    //mock.restore();
+    mock.restore();
 
     // [BRITTLE]: Manually reset the serverless lodash cache.
     // TODO: getServerlessConfigFile.cache = new Map();
@@ -26,7 +25,7 @@ describe("lib/index", () => {
   describe("TODO", () => {
     it("TODO lib tests", async () => {
       serverless = await createServerless({ sandbox });
-      console.log("TODO HERE", { serverless });
+      console.log("TODO HERE", { serverless }); // eslint-disable-line no-console
     });
   });
 });
