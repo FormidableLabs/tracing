@@ -45,7 +45,6 @@
     "yargs": "^17.6.2"
   },
   "devDependencies": {
-    "adm-zip": "^0.5.9",
-    "fs-extra": "^10.1.0"
+    "adm-zip": "^0.5.9"
   }
 }

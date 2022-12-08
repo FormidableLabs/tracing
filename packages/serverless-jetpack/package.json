@@ -26,10 +26,10 @@
   "devDependencies": {},
   "scripts": {
     "lint": "pnpm exec eslint .",
-    "test": "echo TODO JETPACK - test",
-    "test:cov": "echo TODO JETPACK - test:cov",
+    "test": "pnpm exec mocha -r ./test/setup.js \"**/*.spec.js\"",
+    "test:cov": "pnpm exec nyc mocha -r ./test/setup.js \"**/*.spec.js\"",
     "check": "pnpm run lint && pnpm run test",
     "check:ci": "pnpm run lint && pnpm run test:cov",
-    "codecov": "echo TODO JETPACK - codecov"
+    "codecov": "pnpm exec codecov -p \"../..\""
   }
 }
