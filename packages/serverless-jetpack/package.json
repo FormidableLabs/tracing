@@ -23,7 +23,9 @@
     "inspectdep": "^0.2.0",
     "trace-pkg": "^0.5.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "serverless": "^3.22.0"
+  },
   "scripts": {
     "lint": "pnpm exec eslint .",
     "test": "pnpm exec mocha -r ./test/setup.js \"**/*.spec.js\"",
