@@ -1,112 +1,54 @@
 "use strict";
 
-const { readdir } = require("fs").promises;
-const path = require("path");
-
 const mock = require("mock-fs");
 const { createSandbox } = require("sinon");
+
 const { createServerless } = require("../util/serverless");
+const { mockSls } = require("../util/mock-fs");
 const { zipContents } = require("trace-pkg/test/util/file");
 
-const LAZY_MODS = new Set(["ajv", "ajv-formats", "serverless", "aws-sdk"]);
-
-// Find needed lazy node modules to load.
-const findLazyMods = async () => {
-  const pnpmDir = path.resolve(__dirname, "../../../../node_modules/.pnpm");
-  const mods = await readdir(pnpmDir);
-
-  return mods.reduce((memo, mod) => {
-    const pkg = mod.slice(0, mod.lastIndexOf("@"));
-    if (LAZY_MODS.has(pkg)) {
-      memo[mod] = mock.load(path.resolve(__dirname, `../../../../node_modules/.pnpm/${mod}`));
-    }
-
-    return memo;
-  }, {});
-};
 
 describe("lib/index", () => {
   let sandbox;
   let serverless;
-  let lazyMods;
 
-  before(async () => {
-    lazyMods = await findLazyMods();
-  });
-
-  beforeEach(() => {
-    mock({});
+  beforeEach(async () => {
     sandbox = createSandbox();
   });
 
   afterEach(() => {
     sandbox.restore();
     mock.restore();
-
-    // [BRITTLE]: Manually reset the serverless lodash cache.
-    // TODO: getServerlessConfigFile.cache = new Map();
   });
 
-  describe("TODO", () => {
-    it("can do basic Serverless packaging", async function () {
-      let start;
-      start = Date.now();
-      // TODO REMOVE
-      this.timeout(5000); // eslint-disable-line no-magic-numbers,no-invalid-this
+  describe("baseline", () => {
+    // Note: This _doesn't_ use Jetpack. Just tests our SLS harness works.
+    it("can do basic Serverless packaging", async () => {
+      await mockSls({
+        "serverless.yml": `
+          service: sls-mocked
 
-      // TODO: Abstract all of this / find a different solution to the lazy require() problem in SLS
-      // Go to project root to load mocks.
-      process.chdir(path.resolve(__dirname, "../../../../"));
-      mock({
-        packages: {
-          "serverless-jetpack": {
-            test: {
-              // The AJV cache thing is stashed here.
-              ".serverless": mock.load(path.resolve(__dirname, "../.serverless"))
-            },
-            "test-dir": {
-              // We will end up here for CWD.
-              "serverless.yml": `
-                service: sls-mocked
+          provider:
+            name: aws
+            runtime: nodejs16.x
 
-                provider:
-                  name: aws
-                  runtime: nodejs16.x
+          package:
+            include:
+              - "!**"
+              - "serverless.yml"
 
-                package:
-                  include:
-                    - "!**"
-                    - "serverless.yml"
-
-                functions:
-                  one:
-                    handler: one.handler
-              `
-            }
-          }
-        },
-        node_modules: {
-          ".pnpm": lazyMods
-        }
+          functions:
+            one:
+              handler: one.handler
+        `
       });
 
-      // Go back to package root for tests.
-      process.chdir(path.resolve(__dirname, "../../test-dir"));
-      console.log("mock()", Date.now() - start);
-
-      start = Date.now();
       serverless = await createServerless();
-      console.log("create()", Date.now() - start);
-
-      start = Date.now();
       await serverless.run();
-      console.log("run()", Date.now() - start);
 
-      start = Date.now();
       expect(zipContents(".serverless/sls-mocked.zip")).to.eql([
         "serverless.yml"
       ]);
-      console.log("unzip()", Date.now() - start);
     });
   });
 });

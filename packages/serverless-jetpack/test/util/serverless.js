@@ -9,8 +9,6 @@ const { stub } = require("sinon");
 // files that force the early imports.
 require("serverless/lib/cli/handle-error");
 require("serverless/lib/plugins");
-require("serverless/lib/utils/aws-sdk-patch");
-require("serverless/lib/plugins/aws/package/compile/events/s3/config-schema");
 
 // Wrap serverless to allow "normal" usage with plugin injected.
 const createServerless = async ({ options = {}, commands = ["package"] } = {}) => {
@@ -29,9 +27,13 @@ const createServerless = async ({ options = {}, commands = ["package"] } = {}) =
   });
 
   await serverless.init();
-  serverless.cli = {
+  serverless.cli = Object.assign(serverless.cli, {
     log: stub()
-  };
+  });
+  serverless.service = Object.assign(serverless.service, {
+    // Validate is super-slow! (~1sec)
+    validate: stub()
+  });
 
   // TODO: Refactor to maybe be { serverless, restore }
   return serverless;
