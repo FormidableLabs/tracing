@@ -1,5 +1,6 @@
 "use strict";
 
+const { readdir } = require("fs").promises;
 const path = require("path");
 
 const mock = require("mock-fs");
@@ -7,9 +8,31 @@ const { createSandbox } = require("sinon");
 const { createServerless } = require("../util/serverless");
 const { zipContents } = require("trace-pkg/test/util/file");
 
+const LAZY_MODS = new Set(["ajv", "ajv-formats", "serverless", "aws-sdk"]);
+
+// Find needed lazy node modules to load.
+const findLazyMods = async () => {
+  const pnpmDir = path.resolve(__dirname, "../../../../node_modules/.pnpm");
+  const mods = await readdir(pnpmDir);
+
+  return mods.reduce((memo, mod) => {
+    const pkg = mod.slice(0, mod.lastIndexOf("@"));
+    if (LAZY_MODS.has(pkg)) {
+      memo[mod] = mock.load(path.resolve(__dirname, `../../../../node_modules/.pnpm/${mod}`));
+    }
+
+    return memo;
+  }, {});
+};
+
 describe("lib/index", () => {
   let sandbox;
   let serverless;
+  let lazyMods;
+
+  before(async () => {
+    lazyMods = await findLazyMods();
+  });
 
   beforeEach(() => {
     mock({});
@@ -63,12 +86,7 @@ describe("lib/index", () => {
           }
         },
         node_modules: {
-          ".pnpm": {
-            "ajv@8.11.0": mock.load(path.resolve(__dirname, "../../../../node_modules/.pnpm/ajv@8.11.0")),
-            "ajv-formats@2.1.1": mock.load(path.resolve(__dirname, "../../../../node_modules/.pnpm/ajv-formats@2.1.1")),
-            "serverless@3.22.0": mock.load(path.resolve(__dirname, "../../../../node_modules/.pnpm/serverless@3.22.0")),
-            "aws-sdk@2.1202.0": mock.load(path.resolve(__dirname, "../../../../node_modules/.pnpm/aws-sdk@2.1202.0"))
-          }
+          ".pnpm": lazyMods
         }
       });
 
