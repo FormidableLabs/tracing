@@ -4,12 +4,17 @@ const path = require("path");
 
 const mock = require("mock-fs");
 const { createSandbox } = require("sinon");
-const { createServerless } = require("../util/serverless");
+const { loadImports, createServerless } = require("../util/serverless");
 const { zipContents } = require("trace-pkg/test/util/file");
 
 describe("lib/index", () => {
   let sandbox;
   let serverless;
+
+  before(async () => {
+    // Force all file imports any file mocking.
+    await loadImports();
+  });
 
   beforeEach(() => {
     mock({});
@@ -37,6 +42,10 @@ describe("lib/index", () => {
       mock({
         packages: {
           "serverless-jetpack": {
+            "test": {
+              // The AJV cache thing is stashed here.
+              ".serverless": mock.load(path.resolve(__dirname, "../.serverless"))
+            },
             "test-dir": {
               // We will end up here for CWD.
               "serverless.yml": `
@@ -56,10 +65,10 @@ describe("lib/index", () => {
                     handler: one.handler
               `
             },
-            node_modules: mock.load(path.resolve(__dirname, "../../node_modules"))
+            //node_modules: mock.load(path.resolve(__dirname, "../../node_modules"))
           }
         },
-        node_modules: mock.load(path.resolve(__dirname, "../../../../node_modules"))
+        //node_modules: mock.load(path.resolve(__dirname, "../../../../node_modules"))
       });
 
       // Go back to package root for tests.
