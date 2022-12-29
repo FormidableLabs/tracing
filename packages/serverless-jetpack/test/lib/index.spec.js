@@ -4,17 +4,12 @@ const path = require("path");
 
 const mock = require("mock-fs");
 const { createSandbox } = require("sinon");
-const { loadImports, createServerless } = require("../util/serverless");
+const { createServerless } = require("../util/serverless");
 const { zipContents } = require("trace-pkg/test/util/file");
 
 describe("lib/index", () => {
   let sandbox;
   let serverless;
-
-  before(async () => {
-    // Force all file imports any file mocking.
-    await loadImports();
-  });
 
   beforeEach(() => {
     mock({});
@@ -42,7 +37,7 @@ describe("lib/index", () => {
       mock({
         packages: {
           "serverless-jetpack": {
-            "test": {
+            test: {
               // The AJV cache thing is stashed here.
               ".serverless": mock.load(path.resolve(__dirname, "../.serverless"))
             },
@@ -64,11 +59,17 @@ describe("lib/index", () => {
                   one:
                     handler: one.handler
               `
-            },
-            //node_modules: mock.load(path.resolve(__dirname, "../../node_modules"))
+            }
           }
         },
-        //node_modules: mock.load(path.resolve(__dirname, "../../../../node_modules"))
+        node_modules: {
+          ".pnpm": {
+            "ajv@8.11.0": mock.load(path.resolve(__dirname, "../../../../node_modules/.pnpm/ajv@8.11.0")),
+            "ajv-formats@2.1.1": mock.load(path.resolve(__dirname, "../../../../node_modules/.pnpm/ajv-formats@2.1.1")),
+            "serverless@3.22.0": mock.load(path.resolve(__dirname, "../../../../node_modules/.pnpm/serverless@3.22.0")),
+            "aws-sdk@2.1202.0": mock.load(path.resolve(__dirname, "../../../../node_modules/.pnpm/aws-sdk@2.1202.0"))
+          }
+        }
       });
 
       // Go back to package root for tests.
