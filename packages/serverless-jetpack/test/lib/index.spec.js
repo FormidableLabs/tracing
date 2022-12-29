@@ -26,6 +26,8 @@ describe("lib/index", () => {
 
   describe("TODO", () => {
     it("can do basic Serverless packaging", async function () {
+      let start;
+      start = Date.now();
       // TODO REMOVE
       this.timeout(5000); // eslint-disable-line no-magic-numbers,no-invalid-this
 
@@ -35,23 +37,25 @@ describe("lib/index", () => {
       mock({
         packages: {
           "serverless-jetpack": {
-            // We will end up here for CWD.
-            "serverless.yml": `
-              service: sls-mocked
+            "test-dir": {
+              // We will end up here for CWD.
+              "serverless.yml": `
+                service: sls-mocked
 
-              provider:
-                name: aws
-                runtime: nodejs16.x
+                provider:
+                  name: aws
+                  runtime: nodejs16.x
 
-              package:
-                patterns:
-                  - "!**"
-                  - "serverless.yml"
+                package:
+                  include:
+                    - "!**"
+                    - "serverless.yml"
 
-              functions:
-                one:
-                  handler: one.handler
-            `,
+                functions:
+                  one:
+                    handler: one.handler
+              `
+            },
             node_modules: mock.load(path.resolve(__dirname, "../../node_modules"))
           }
         },
@@ -59,15 +63,22 @@ describe("lib/index", () => {
       });
 
       // Go back to package root for tests.
-      process.chdir(path.resolve(__dirname, "../.."));
+      process.chdir(path.resolve(__dirname, "../../test-dir"));
+      console.log("mock()", Date.now() - start);
 
+      start = Date.now();
       serverless = await createServerless();
+      console.log("create()", Date.now() - start);
 
+      start = Date.now();
       await serverless.run();
+      console.log("run()", Date.now() - start);
 
+      start = Date.now();
       expect(zipContents(".serverless/sls-mocked.zip")).to.eql([
         "serverless.yml"
       ]);
+      console.log("unzip()", Date.now() - start);
     });
   });
 });

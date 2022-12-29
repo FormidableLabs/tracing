@@ -25,6 +25,7 @@ const createServerless = async ({ options = {}, commands = ["package"] } = {}) =
     configuration,
     configurationFilename
   });
+
   await serverless.init();
   serverless.cli = {
     log: stub()
