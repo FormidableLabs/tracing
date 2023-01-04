@@ -1,4 +1,4 @@
-# Tracing
+[![Tracing — Formidable, We build the modern web](https://raw.githubusercontent.com/FormidableLabs/tracing/main/tracing-Hero.png)](https://formidable.com/open-source/)
 
 [![Actions Status][actions_img]][actions_site]
 [![Coverage Status][cov_img]][cov_site]
