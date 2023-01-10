@@ -33,7 +33,7 @@ describe("lib/index", () => {
             runtime: nodejs16.x
 
           package:
-            include:
+            patterns:
               - "!**"
               - "serverless.yml"
 
