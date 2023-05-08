@@ -14,6 +14,9 @@
     "npm",
     "yarn"
   ],
+  "publishConfig": {
+    "provenance": true
+  },
   "scripts": {
     "lint": "pnpm exec eslint .",
     "test": "pnpm exec mocha -r ./test/setup.js \"**/*.spec.js\"",
