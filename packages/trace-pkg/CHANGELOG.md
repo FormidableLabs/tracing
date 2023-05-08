@@ -1,5 +1,14 @@
 Changes
 
+## 0.5.3
+
+### Patch Changes
+
+- Adding NPM Provenance Badge ([#28](https://github.com/FormidableLabs/tracing/pull/28))
+
+- Updated dependencies [[`7b169ce`](https://github.com/FormidableLabs/tracing/commit/7b169ceeee461ecd952ef19ac31f92291b43a989)]:
+  - trace-deps@0.5.2
+
 ## 0.5.2
 
 ### Patch Changes

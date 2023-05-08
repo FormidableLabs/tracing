@@ -1,5 +1,11 @@
 Changes
 
+## 0.5.2
+
+### Patch Changes
+
+- Adding NPM Provenance Badge ([#28](https://github.com/FormidableLabs/tracing/pull/28))
+
 ## 0.5.1
 
 ### Patch Changes
